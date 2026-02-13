@@ -1,0 +1,14 @@
+:root {
+	--color-bg-0: #202020;
+	--color-bg-1: #303030;
+	--color-bg-2: #555;
+	--color-text: #e0e0e0;
+	--color-text-dim: #666;
+	--color-theme-1: #f74242;
+	--color-theme-2: #f1ad46;
+	--color-theme-3: #7adf7f;
+	--color-theme-4: #3cb9f3;
+
+    background: var(--color-bg-0);
+    color: var(--color-text);
+}
