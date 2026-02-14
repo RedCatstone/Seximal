@@ -12,3 +12,24 @@
     background: var(--color-bg-0);
     color: var(--color-text);
 }
+
+
+input[type="number"] {
+	height: 30px;
+	margin: 5px 0;
+	padding: 0 5px;
+	font-size: 1.2rem;
+
+	background: black;
+	border: 1px solid transparent;
+	color: var(--color-theme-2);
+	border-radius: 4px;
+	outline: none;
+	text-align: center;
+
+	/* Hide arrows for number input */
+	&::-webkit-inner-spin-button, &::-webkit-outer-spin-button {
+		-webkit-appearance: none;
+		margin: 0;
+	}
+}

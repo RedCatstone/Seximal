@@ -1,17 +1,12 @@
 <script lang="ts">
-    
-    const BASE_NAMES = {
-        1: "Unary", 2: "Binary", 3: "Ternary", 4: "Quaternary", 5: "Quinary", 6: "Seximal", 7: "Septimal", 8: "Octal", 9: "Nonary", 10: "Decimal",
-        11: "Elevenary", 12: "Dozenal", 13: "Baker's Dozenal", 14: "Biseptimal", 15: "Triquinary", 16: "Hex"
-
-    }
-    const BASE = $state(6);
-    const BASE_NAME = $derived(BASE_NAMES[BASE]);
+	import { baseState } from "$lib/globalState.svelte";
+	import { doInfixOp, doPrefixOp, type InfixOperator, type PrefixOperator } from "$lib/mathstuff.svelte";
+    let base = $derived(baseState.base);
 
     const NUM_COLUMNS = 3; // visual 3 columns
 
     const digits = $derived((() => {
-        let numbers = Array.from({ length: BASE-1 }, (_, i) => i+1);  // 1 2 3 ...
+        let numbers = Array.from({ length: base-1 }, (_, i) => i+1);  // 1 2 3 ...
         let ordered_digits = [];  // with NUM_COLUMNS = 3: 7 8 9 4 5 6 1 2 3 0
 
         while (numbers.length) {
@@ -20,19 +15,18 @@
         ordered_digits.push(0);
         return ordered_digits
     })());
-    const equals_span = $derived(NUM_COLUMNS - (BASE % NUM_COLUMNS) || NUM_COLUMNS);
+    const equals_span = $derived(NUM_COLUMNS - (base % NUM_COLUMNS) || NUM_COLUMNS);
 
 
     // ------------------------------
     //      Calculator State
     // ------------------------------
     let inputLeft = $state<number | number[] | null>(null);
-    let currInfixOp = $state<string | null>(null);
+    let currInfixOp = $state<InfixOperator | null>(null);
     let inputRight = $state<number | null>(0);     // the number you are currently inputting
     let decimalDigit = $state<number | null>(null);    // which decimal digit you are currently typing in
 
-    let pastCalc = $state<[number, string, number] /*infix*/ | [string, number] /* prefix */ | null>(null);
-    let showList = $state<number[] | null>(null);
+    let pastCalc = $state<[number, InfixOperator, number] | [PrefixOperator, number] | null>(null);
 
 
     const displayedCalc = $derived(displayInfix(inputLeft, currInfixOp, inputRight));
@@ -46,8 +40,11 @@
 
     function displayInfix(left: number|number[]|null, op: string|null, right: number|null): string {
         const strLeft = Array.isArray(left) ? `[${left.map(x => displayNumber(x))}]` : displayNumber(left);
-        const strRight = displayNumber(right) + (decimalDigit === 1 ? '.' : '');
-        if (op === "log_") return `${op ?? ''}${strLeft}(${strRight})`
+        let strRight = displayNumber(right);
+        if (decimalDigit && !strRight.includes('.')) {
+            strRight += '.' + '0'.repeat(decimalDigit - 1)
+        }
+        if (op === "log_") return `${op ?? ''}${strLeft}(${strRight || ' '})`
         else return `${strLeft} ${op ?? ''} ${strRight}`
     }
     function displayPrefix(op: string|null, left: number|null): string {
@@ -65,15 +62,15 @@
         const absN = Math.abs(n);
 
         // thresholds for switching to exponential
-        const upperLimit = BASE ** 9;
-        const lowerLimit = BASE ** -5;
+        const upperLimit = base ** 9;
+        const lowerLimit = base ** -5;
         
         if (absN >= lowerLimit && absN <= upperLimit) {
-            return n.toString(BASE);
+            return n.toString(base);
         }
-        const exponent = Math.floor(Math.log(absN) / Math.log(BASE));
-        const significand = n / BASE**exponent;
-        return `${significand.toString(BASE).substring(0, 6)}e${exponent.toString(BASE)}`;
+        const exponent = Math.floor(Math.log(absN) / Math.log(base));
+        const significand = n / base**exponent;
+        return `${significand.toString(base).substring(0, 6)}𝕖${exponent.toString(base)}`;
     }
 
     function clearInput() {
@@ -83,6 +80,11 @@
         inputRight = 0;
         decimalDigit = null;
         pastCalc = null;
+    }
+
+    function pressBackspace() {
+        if (inputRight == null || inputRight == 0) clearInput();
+        else inputRight = Math.floor(inputRight / base)
     }
 
     function pressNum(n: number) {
@@ -95,20 +97,20 @@
         } else {
             if (decimalDigit == null) {
                 if (inputRight < 0 || Object.is(inputRight, -0)) {
-                    inputRight = inputRight * BASE - n;
+                    inputRight = inputRight * base - n;
                 }
-                else inputRight = inputRight * BASE + n;
+                else inputRight = inputRight * base + n;
             } else {
                 if (inputRight < 0 || Object.is(inputRight, -0)) {
-                    inputRight -= n / (BASE**decimalDigit);
+                    inputRight -= n / (base**decimalDigit);
                 }
-                else inputRight += n / (BASE**decimalDigit);
+                else inputRight += n / (base**decimalDigit);
                 decimalDigit += 1;
             }
         }
     }
 
-    function pressInfixOp(op: string) {
+    function pressInfixOp(op: InfixOperator) {
         if (Array.isArray(inputLeft)) return;
         pastCalc = null;
         if (op === "-" && inputRight === 0) {
@@ -133,23 +135,16 @@
         decimalDigit = null;
     }
 
-    function pressPrefixOp(op: string) {
+    function pressPrefixOp(op: PrefixOperator) {
         if (Array.isArray(inputLeft)) return;
         if (inputLeft != null && inputRight == null && currInfixOp == null) {
             inputRight = inputLeft;
             inputLeft = null;
         }
         if (inputRight == null) return;
+        decimalDigit = null;
 
-        let result;        
-        if (op == "%") result = inputRight / BASE**2;
-        else if (op == "√") result = Math.sqrt(inputRight);
-        else if (op == "!") result = gamma(inputRight + 1);
-        else if (op == "log") result = Math.log(inputRight) / Math.log(BASE);
-        else if (op == "1/") result = 1 / inputRight;
-        else if (op == "Sum ") result = inputRight.toString(BASE).split('').reduce((tot, x) => tot += Number(x), 0);
-        else if (op == "Prim ") result = primeFactors(inputRight);
-        else throw new Error("woopsie, invalid prefix op");
+        const result = doPrefixOp(op, inputRight);
 
         pastCalc = [op, inputRight];
 
@@ -170,22 +165,21 @@
                 pressPrefixOp(pastCalc[0]);
             }
         }
-        if (inputLeft == null || Array.isArray(inputLeft) || inputRight == null) return;
-        let result;
-        if (currInfixOp == "+") result = inputLeft + inputRight;
-        else if (currInfixOp == "-") result = inputLeft - inputRight;
-        else if (currInfixOp == "*") result = inputLeft * inputRight;
-        else if (currInfixOp == "÷") result = inputLeft / inputRight;
-        else if (currInfixOp == "^") result = inputLeft ** inputRight;
-        else if (currInfixOp == "mod") result = inputLeft % inputRight;
-        else if (currInfixOp == "log_") result = Math.log(inputRight) / Math.log(inputLeft || NaN /* NaN on base zero */);
-        else throw new Error("woopsie, invalid op");
+        if (inputLeft == null || Array.isArray(inputLeft) || inputRight == null || currInfixOp == null) return;
+
+        const result = doInfixOp(inputLeft, currInfixOp, inputRight);
 
         pastCalc = [inputLeft, currInfixOp, inputRight];
         inputLeft = result;
         inputRight = null;
         currInfixOp = null;
         decimalDigit = null;
+    }
+
+    function pressDecimalMode() {
+        if (decimalDigit == null && inputRight != null) {
+            decimalDigit = 1
+        }
     }
 
     function loadConstant(n: number) {
@@ -197,54 +191,31 @@
         decimalDigit = Infinity;
     }
 
-    function gamma(n: number): number {
-        // Gamma is undefined at zero and negative integers
-        if (n <= 0 && Number.isInteger(n)) return NaN;
-        // n > 172 is just too large for f64
-        if (n > 172) return Infinity;
+    function handleKeyDown(e: KeyboardEvent) {
+        const k = e.key;
 
-        // a simple for loop for integers
-        if (n > 0 && Number.isInteger(n)) {
-            let result = 1;
-            for (let i = 1; i < n; i++) {
-                result *= i
-            }
-            return result;
+        // Numbers
+        const parsed = parseInt(k, 36);
+        if (!isNaN(parsed) && parsed < base) {
+            pressNum(parsed);
         }
-        
-        // Source - https://stackoverflow.com/a/15454866 - accurate to about 15 decimal places
-        const g = 7; // g represents the precision desired, p is the values of p[i] to plug into Lanczos' formula
-        const p = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
-        if (n < 0.5) return Math.PI / Math.sin(n * Math.PI) / gamma(1 - n);
-        else {
-            n--;
-            let x = p[0];
-            for (let i = 1; i < g + 2; i++) x += p[i] / (n + i);
-            const t = n + g + 0.5;
-            return Math.sqrt(2 * Math.PI) * Math.pow(t, (n + 0.5)) * Math.exp(-t) * x;
-        }
-    }
-
-    function primeFactors(n: number): number[] | number {
-        if (n <= 1) return NaN;
-        const factors = [];
-        let divisor = 2;
-        while (n >= 2) {
-            if (n % divisor == 0) {
-                factors.push(divisor);
-                n /= divisor;
-            }
-            else if (divisor > 10_000_000) return NaN;
-            else divisor++;
-        }
-        return factors;
+        else if (k == '+' || k == '-' || k == '*' || k == '^') pressInfixOp(k);
+        else if (k == '/') pressInfixOp('÷');
+        else if (k == 'Enter' || k == '=') pressEquals();
+        else if (k == '.' || k == ',') pressDecimalMode();
+        else if (k == 'Delete' || k == 'Escape') clearInput();
+        else if (k == 'Backspace') pressBackspace();
+        else if (k == '!') pressPrefixOp('!');
+        else return
+        e.preventDefault()
     }
 </script>
 
-<div class="calculator-container">
+<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+<div class="calculator-container" onkeydown={handleKeyDown} role="application" aria-label="Seximal Calculator">
     <div class="calculator">
         <header>
-            <span class="brand">{BASE_NAME.toUpperCase()} <span class="model">IT-{BASE}{BASE**2-1}D</span></span>
+            <span class="brand">{baseState.baseName.toUpperCase()} <span class="model">IT-{base}{base**2-1}D</span></span>
         </header>
         <div class="output-area">
             <div class="past-calc">{displayedPastCalc}</div>
@@ -272,7 +243,7 @@
                         <button class="digit" onclick={() => pressNum(number)}>{number.toString(36)}</button>
                     {/each}
                     <button class="digit"
-                        onclick={() => { if (decimalDigit == null && inputRight != null) { decimalDigit = 1 } }}
+                        onclick={pressDecimalMode}
                         style:grid-column="span {equals_span}"
                     >.</button>
                 </div>
@@ -324,7 +295,7 @@
         overflow: hidden;
         white-space: nowrap;
 
-        min-height: 60px;
+        min-height: 50px;
         display: flex;
         flex-direction: column;
         justify-content: end;
@@ -332,7 +303,7 @@
         & .curr-calc {
             display: flex;
             justify-content: flex-end;
-            font-size: 2rem;
+            font-size: 1.6rem;
         }
         & .past-calc {
             display: flex;
