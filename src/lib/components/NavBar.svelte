@@ -1,16 +1,17 @@
 <script lang="ts">
 	import { page } from '$app/state';
+    import { resolve } from '$app/paths';
 </script>
 
 <nav class="module-nav">
 	<div class="links">
-        <a href="/counting" class:active={page.url.pathname === '/counting'}>
+        <a href={resolve("/counting")} class:active={page.url.pathname === resolve("/counting")}>
             Counting
         </a>
-		<a href="/calculator" class:active={page.url.pathname === '/calculator'}>
+		<a href={resolve("/calculator")} class:active={page.url.pathname === resolve("/calculator")}>
 			Calculator
 		</a>
-		<a href="/quickmaths" class:active={page.url.pathname === '/quickmaths'}>
+		<a href={resolve("/quickmaths")} class:active={page.url.pathname === resolve("/quickmaths")}>
 			Quick Maths
 		</a>
 	</div>
