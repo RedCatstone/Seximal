@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { baseState } from "$lib/globalState.svelte";
-	import { doInfixOp, doPrefixOp, type InfixOperator, type PrefixOperator } from "$lib/mathstuff.svelte";
+	import { displayCalc, displayInfix, doInfixCalc, doPrefixCalc, type InfixOperator, type InfixOrPrefixCalc, type PrefixOperator } from "$lib/mathstuff.svelte";
     let base = $derived(baseState.base);
 
     const NUM_COLUMNS = 3; // visual 3 columns
@@ -26,57 +26,20 @@
     let inputRight = $state<number | null>(0);     // the number you are currently inputting
     let decimalDigit = $state<number | null>(null);    // which decimal digit you are currently typing in
 
-    let pastCalc = $state<[number, InfixOperator, number] | [PrefixOperator, number] | null>(null);
+    let pastCalc = $state<InfixOrPrefixCalc | null>(null);
 
 
-    const displayedCalc = $derived(displayInfix(inputLeft, currInfixOp, inputRight));
+    const displayedCalc = $derived(displayInfix(inputLeft, currInfixOp, inputRight, decimalDigit));
     const displayedPastCalc = $derived(
         pastCalc
-        ? pastCalc.length == 3
-            ? displayInfix(...pastCalc) + ' ='
-            : displayPrefix(...pastCalc) + ' ='
+        ? displayCalc(pastCalc)
         : ''
     );
-
-    function displayInfix(left: number|number[]|null, op: string|null, right: number|null): string {
-        const strLeft = Array.isArray(left) ? `[${left.map(x => displayNumber(x))}]` : displayNumber(left);
-        let strRight = displayNumber(right);
-        if (decimalDigit && !strRight.includes('.')) {
-            strRight += '.' + '0'.repeat(decimalDigit - 1)
-        }
-        if (op === "log_") return `${op ?? ''}${strLeft}(${strRight || ' '})`
-        else return `${strLeft} ${op ?? ''} ${strRight}`
-    }
-    function displayPrefix(op: string|null, left: number|null): string {
-        if (op === "!" || op == "%") return `${displayNumber(left)}${op}`
-        else return `${op}${displayNumber(left)}`
-    }
-
-    function displayNumber(n: number | null): string {
-        if (n == null) return "";
-        else if (Object.is(n, -0)) return "-";
-        else if (n === 0) return "0";
-        else if (n === Infinity) return "Infinity";
-        else if (n === -Infinity) return "-Infinity";
-        else if (Number.isNaN(n)) return "ERROR";
-        const absN = Math.abs(n);
-
-        // thresholds for switching to exponential
-        const upperLimit = base ** 9;
-        const lowerLimit = base ** -5;
-        
-        if (absN >= lowerLimit && absN <= upperLimit) {
-            return n.toString(base);
-        }
-        const exponent = Math.floor(Math.log(absN) / Math.log(base));
-        const significand = n / base**exponent;
-        return `${significand.toString(base).substring(0, 6)}𝕖${exponent.toString(base)}`;
-    }
 
     function clearInput() {
         inputLeft = null;
         currInfixOp = null;
-        inputRight = 69420; // needed to update sveltes state
+        inputRight = 69420; // needed to update sveltes state on -0, 0
         inputRight = 0;
         decimalDigit = null;
         pastCalc = null;
@@ -115,7 +78,7 @@
         pastCalc = null;
         if (op === "-" && inputRight === 0) {
             const isNegative = Object.is(inputRight, -0);
-            inputRight = 69420; // needed to update sveltes state
+            inputRight = 69420; // needed to update sveltes state on -0, 0
             inputRight = isNegative ? 0 : -0;
             return
         }
@@ -144,7 +107,7 @@
         if (inputRight == null) return;
         decimalDigit = null;
 
-        const result = doPrefixOp(op, inputRight);
+        const result = doPrefixCalc(op, inputRight);
 
         pastCalc = [op, inputRight];
 
@@ -167,7 +130,7 @@
         }
         if (inputLeft == null || Array.isArray(inputLeft) || inputRight == null || currInfixOp == null) return;
 
-        const result = doInfixOp(inputLeft, currInfixOp, inputRight);
+        const result = doInfixCalc(inputLeft, currInfixOp, inputRight);
 
         pastCalc = [inputLeft, currInfixOp, inputRight];
         inputLeft = result;
@@ -212,8 +175,8 @@
 </script>
 
 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-<div class="calculator-container" onkeydown={handleKeyDown} role="application" aria-label="Seximal Calculator">
-    <div class="calculator">
+<div class="container-container" onkeydown={handleKeyDown} role="application" aria-label="Seximal Calculator">
+    <div class="container">
         <header>
             <span class="brand">{baseState.baseName.toUpperCase()} <span class="model">IT-{base}{base**2-1}D</span></span>
         </header>
@@ -261,14 +224,14 @@
 </div>
 
 <style>
-    .calculator-container {
+    .container-container {
         display: flex;
         justify-content: center;
         align-items: center;
         font-family: MATH;
     }
 
-    .calculator {
+    .container {
         flex-direction: column;
         padding: 24px;
         border: 2px solid var(--color-bg-1);
@@ -327,46 +290,6 @@
             gap: 10px;
             align-content: baseline;
             grid-template-columns: repeat(var(--columns), var(--button-size));
-        }
-
-        & button {
-            height: var(--button-size);
-            width: 100%;
-            border-radius: 15px;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 4px 0 black;
-            font-size: 1.8rem;
-
-            color: var(--button-color);
-            --button-bg-color: #9b9b9b;
-            background: color-mix(in oklab, var(--button-bg-color) 30%, black 70%);
-            border: 1px solid color-mix(in oklab, var(--button-color) 80%, black 20%);
-
-            &:hover {
-                background: color-mix(in oklab, var(--button-bg-color) 28%, black 72%);
-                transform: translateY(-1px);
-                box-shadow: 0 5px 0 black;
-            }
-            &:active {
-                transform: translateY(2px);
-                box-shadow: 0 2px 0 black;
-            }
-
-            &.digit {
-                --button-color: var(--color-text);
-                --button-bg-color: var(--color-text);
-            }
-            &.util { --button-color: var(--color-theme-2); font-size: 1.3rem }
-            &.const { --button-color: var(--color-theme-3); }
-            &.ac {
-                --button-bg-color: var(--color-theme-1);
-                --button-color: var(--color-theme-1);
-            }
-            &.equals {
-                --button-bg-color: var(--color-theme-4);
-                --button-color: var(--color-theme-4);
-            }
         }
     }
 </style>

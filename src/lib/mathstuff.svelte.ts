@@ -4,18 +4,30 @@ let base = $derived(baseState.base);
 export type PrefixOperator = '%' | '√' | '!' | 'log' | '1/' | 'Sum ' | 'Prim ';
 export type InfixOperator = '+' | '-' | '*' | '÷' | '^' | 'mod' | 'log_';
 
-export function doPrefixOp(op: PrefixOperator, n: number): number | number[] {
+export type InfixOrPrefixCalc = [number, InfixOperator, number] | [PrefixOperator, number];
+
+export const infixOpNames = {
+    '+': 'Addition',
+    '-': 'Subtraction',
+    '*': 'Multiplication',
+    '÷': 'Division',
+    '^': 'Exponentiation',
+    'mod': 'Modular',
+    'log_': 'Logarithmic',
+}
+
+export function doPrefixCalc(op: PrefixOperator, n: number): number | number[] {
     if (op == '%') return n / base**2;
     else if (op == '√') return Math.sqrt(n);
     else if (op == '!') return gamma(n + 1);
     else if (op == 'log') return Math.log(n) / Math.log(base);
     else if (op == '1/') return 1 / n;
-    else if (op == 'Sum ') return n.toString(base).split('').reduce((tot, x) => tot += Number(x), 0);
+    else if (op == 'Sum ') return n.toString(base).split('').reduce((tot, x) => tot + parseInt(x, base), 0);
     else if (op == 'Prim ') return primeFactors(n);
     throw new Error("woops.")
 }
 
-export function doInfixOp(left: number, op: InfixOperator, right: number): number {
+export function doInfixCalc(left: number, op: InfixOperator, right: number): number {
     if (op == '+') return left + right;
     else if (op == '-') return left - right;
     else if (op == '*') return left * right;
@@ -24,6 +36,49 @@ export function doInfixOp(left: number, op: InfixOperator, right: number): numbe
     else if (op == 'mod') return left % right;
     else if (op == 'log_') return Math.log(right) / Math.log(left || NaN /* NaN on base zero */);
     throw new Error("woopsie.")
+}
+
+
+export function displayNumber(n: number | null): string {
+    if (n == null) return "";
+    else if (Object.is(n, -0)) return "-";
+    else if (n === 0) return "0";
+    else if (n === Infinity) return "Infinity";
+    else if (n === -Infinity) return "-Infinity";
+    else if (Number.isNaN(n)) return "ERROR";
+    const absN = Math.abs(n);
+
+    // thresholds for switching to exponential
+    const upperLimit = base ** 9;
+    const lowerLimit = base ** -5;
+    
+    if (absN >= lowerLimit && absN <= upperLimit) {
+        return n.toString(base);
+    }
+    const exponent = Math.floor(Math.log(absN) / Math.log(base));
+    const significand = n / base**exponent;
+    return `${significand.toString(base).substring(0, 6)}𝕖${exponent.toString(base)}`;
+}
+
+export function displayCalc(calc: InfixOrPrefixCalc): string {
+    return calc.length === 3 ? displayInfix(...calc, null) : displayPrefix(...calc)
+}
+export function doCalc(calc: InfixOrPrefixCalc): number | number[] {
+    return calc.length === 3 ? doInfixCalc(...calc) : doPrefixCalc(...calc)
+}
+
+export function displayInfix(left: number|number[]|null, op: string|null, right: number|null, decimalDigit: number|null): string {
+    const strLeft = Array.isArray(left) ? `[${left.map(x => displayNumber(x))}]` : displayNumber(left);
+    let strRight = displayNumber(right);
+    if (decimalDigit && !strRight.includes('.')) {
+        strRight += '.' + '0'.repeat(decimalDigit - 1)
+    }
+    if (op === "log_") return `${op ?? ''}${strLeft}(${strRight || ' '})`
+    else return `${strLeft} ${op ?? ''} ${strRight}`
+}
+function displayPrefix(op: string|null, left: number|null): string {
+    if (op === "!" || op == "%") return `${displayNumber(left)}${op}`
+    else return `${op}${displayNumber(left)}`
 }
 
 
@@ -77,4 +132,12 @@ export function isPrime(num: number): boolean {
         if(num % i === 0) return false;
     }
     return num > 1;
+}
+
+
+export function isHarshad(n: number) {
+    if (n === 0) return false;
+    const digits = n.toString(base).split('').map(d => parseInt(d, base));
+    const digitSum = digits.reduce((a, b) => a + b, 0);
+    return n % digitSum === 0;
 }

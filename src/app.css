@@ -3,7 +3,7 @@
 	--color-bg-1: #303030;
 	--color-bg-2: #555;
 	--color-text: #e0e0e0;
-	--color-text-dim: #666;
+	--color-text-dim: #777;
 	--color-theme-1: #f74242;
 	--color-theme-2: #f1ad46;
 	--color-theme-3: #7adf7f;
@@ -31,5 +31,117 @@ input[type="number"] {
 	&::-webkit-inner-spin-button, &::-webkit-outer-spin-button {
 		-webkit-appearance: none;
 		margin: 0;
+	}
+}
+
+
+button {
+	height: var(--button-size);
+	width: 100%;
+	border-radius: 15px;
+	border: none;
+	cursor: pointer;
+	box-shadow: 0 4px 0 black;
+	font-size: 1.8rem;
+
+	color: var(--button-color);
+	--button-bg-color: #9b9b9b;
+	background: color-mix(in oklab, var(--button-bg-color) 30%, black 70%);
+	border: 1px solid color-mix(in oklab, var(--button-color) 80%, black 20%);
+
+	&:hover {
+		background: color-mix(in oklab, var(--button-bg-color) 28%, black 72%);
+		transform: translateY(-1px);
+		box-shadow: 0 5px 0 black;
+	}
+	&:active {
+		transform: translateY(2px);
+		box-shadow: 0 2px 0 black;
+	}
+
+	&.disabled {
+		pointer-events: none;
+		opacity: 0.5;
+	}
+
+	&.digit {
+		--button-color: var(--color-text);
+		--button-bg-color: var(--color-text);
+	}
+	&.util { --button-color: var(--color-theme-2); font-size: 1.3rem }
+	&.const { --button-color: var(--color-theme-3); }
+	&.ac {
+		--button-bg-color: var(--color-theme-1);
+		--button-color: var(--color-theme-1);
+	}
+	&.equals {
+		--button-bg-color: var(--color-theme-4);
+		--button-color: var(--color-theme-4);
+	}
+}
+
+
+
+
+.table-container {
+	overflow: auto; /* so the table itself scrolls */
+	scrollbar-color: var(--color-bg-2) var(--color-bg-1);
+	scrollbar-width: thin;
+	max-height: 600px;
+	max-width: 90vw;
+
+
+	& span {
+		font-size: 1.8rem;
+		font-weight: 600;
+	}
+	
+	& table {
+		user-select: none;
+		border-collapse: collapse;
+		font-family: 'JetBrains Mono', monospace;
+		color: var(--color-text-dim);
+		font-size: 0.8rem;
+		background: rgba(0, 0, 0, 0.3);
+
+		overflow: hidden;
+		border-spacing: 0;
+
+		& th {
+			padding: 4px 10px;
+			color: var(--color-theme-2);
+		}
+
+		& tr:hover td {
+			background: rgba(255, 255, 255, 0.03);
+		}
+
+		& td {
+			padding: 4px 10px;
+			text-align: center;
+			border: 1px solid #222;
+			position: relative;
+				
+			&.prime, &.multiple, &.square, &.hashard {
+				color: var(--color-theme-3);
+				background: rgb(from var(--color-theme-3) R G B / 0.2);
+				font-weight: bold;
+			}
+
+			&:hover {
+				color: var(--color-text);
+			}
+		}
+
+		& td:hover::after { 
+			position: absolute;
+			pointer-events: none;
+			content: '';
+			height: 200vh;
+			top: -100vh;
+			left: 0;
+			width: 100%;
+			background: rgba(255, 255, 255, 0.03);
+		}
 	}
 }
