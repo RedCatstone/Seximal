@@ -1,5 +1,5 @@
 <script lang="ts">
-	let { checked = $bindable(false), label = "" } = $props<{ checked: boolean, label: string }>();
+	let { checked = $bindable(false), label = "" }: { checked: boolean, label: string } = $props();
 </script>
 
 <label class="checkbox-wrapper">

@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { baseState } from "$lib/globalState.svelte";
+	import { STORED_STATE } from "$lib/globalState.svelte";
 	import { displayNumber, doInfixCalc, infixOpNames, type InfixOperator } from "$lib/mathstuff.svelte";
-    let base = $derived(baseState.base);
+    const base = $derived(STORED_STATE.base);
 
     let tableSize = $derived(base);
     let curr_op = $state<InfixOperator>("*");

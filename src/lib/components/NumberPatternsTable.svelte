@@ -1,8 +1,8 @@
 <script lang="ts">
 	import Checkbox from "$lib/components/reuseable/Checkbox.svelte";
-	import { baseState } from "$lib/globalState.svelte";
+	import { STORED_STATE } from "$lib/globalState.svelte";
 	import { isHarshad, isPrime } from "$lib/mathstuff.svelte";
-    let base = $derived(baseState.base);
+    const base = $derived(STORED_STATE.base);
 
     let rows = $state(360);
 
@@ -61,6 +61,7 @@
 		letter-spacing: 0.5px;
         
         display: flex;
+        flex-wrap: wrap;
         gap: 10px;
 
         & > :global(*):not(:first-child) {

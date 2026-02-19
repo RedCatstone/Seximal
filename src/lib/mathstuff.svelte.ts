@@ -1,5 +1,5 @@
-import { baseState } from "$lib/globalState.svelte";
-let base = $derived(baseState.base);
+import { STORED_STATE } from "$lib/globalState.svelte";
+const base = $derived(STORED_STATE.base);
 
 export type PrefixOperator = '%' | '√' | '!' | 'log' | '1/' | 'Sum ' | 'Prim ';
 export type InfixOperator = '+' | '-' | '*' | '÷' | '^' | 'mod' | 'log_';
@@ -58,6 +58,12 @@ export function displayNumber(n: number | null): string {
     const exponent = Math.floor(Math.log(absN) / Math.log(base));
     const significand = n / base**exponent;
     return `${significand.toString(base).substring(0, 6)}𝕖${exponent.toString(base)}`;
+}
+
+export function displayKeypadNum(keypadNum: number, keypadDecimal: number | null): string {
+    let s = displayNumber(keypadNum);
+    if (keypadDecimal != null && !s.includes('.')) s += '.' + '0'.repeat(keypadDecimal - 1)
+    return s;
 }
 
 export function displayCalc(calc: InfixOrPrefixCalc): string {
@@ -140,4 +146,14 @@ export function isHarshad(n: number) {
     const digits = n.toString(base).split('').map(d => parseInt(d, base));
     const digitSum = digits.reduce((a, b) => a + b, 0);
     return n % digitSum === 0;
+}
+
+
+export function floorWithPrecision(num: number, precision: number): number {
+    const factor = base ** precision;
+    return Math.floor(num * factor) / factor;
+}
+export function ceilWithPrecision(num: number, precision: number): number {
+    const factor = base ** precision;
+    return Math.ceil(num * factor) / factor;
 }

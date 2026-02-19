@@ -1,6 +1,17 @@
-export const baseState = $state({
-    base: 6,
+import { browser } from '$app/environment';
+
+export const STORED_STATE = $state({
+    base: browser ? JSON.parse(localStorage.getItem('seximal_base') || "6") : 6,
+    quickMathsHighscores: browser ? JSON.parse(localStorage.getItem('seximal_quickMathsHighscores') || "{}") : {},
     get baseName() { return getBaseName(this.base) },
+})
+
+
+if (browser) $effect.root(() => {
+    $effect(() => {
+        localStorage.setItem('quickMathsHighscores', JSON.stringify(STORED_STATE.quickMathsHighscores))
+        localStorage.setItem('base', JSON.stringify(STORED_STATE.base))
+    })
 })
 
 const BASE_NAMES: Record<string, string> = {

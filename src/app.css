@@ -11,6 +11,8 @@
 
     background: var(--color-bg-0);
     color: var(--color-text);
+	scrollbar-color: var(--color-bg-2) var(--color-bg-1);
+	scrollbar-width: thin;
 }
 
 
@@ -18,7 +20,7 @@ input[type="number"] {
 	height: 30px;
 	margin: 5px 0;
 	padding: 0 5px;
-	font-size: 1.2rem;
+	font-size: 0.8rem;
 
 	background: black;
 	border: 1px solid transparent;
@@ -38,7 +40,11 @@ input[type="number"] {
 button {
 	height: var(--button-size);
 	width: 100%;
-	border-radius: 15px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	border-radius: clamp(7px, 4vw, 15px);
 	border: none;
 	cursor: pointer;
 	box-shadow: 0 4px 0 black;
@@ -80,13 +86,20 @@ button {
 	}
 }
 
+.calc-buttons {
+	display: grid;
+	justify-content: center;
+	gap: clamp(3px, 3vw, 10px);
+	--button-size: clamp(35px, 15vw, 60px);
+	align-content: baseline;
+	grid-template-columns: repeat(var(--columns), var(--button-size));
+}
+
 
 
 
 .table-container {
 	overflow: auto; /* so the table itself scrolls */
-	scrollbar-color: var(--color-bg-2) var(--color-bg-1);
-	scrollbar-width: thin;
 	max-height: 600px;
 	max-width: 90vw;
 

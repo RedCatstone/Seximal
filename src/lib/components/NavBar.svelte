@@ -3,7 +3,7 @@
     import { resolve } from '$app/paths';
 </script>
 
-<nav class="module-nav">
+<nav class="container">
 	<div class="links">
         <a href={resolve("/counting")} class:active={page.url.pathname === resolve("/counting")}>
             Counting
@@ -18,9 +18,11 @@
 </nav>
 
 <style>
-	.module-nav {
+	.container {
 		display: flex;
 		justify-content: center;
+		overflow-x: auto;
+
 		padding: 10px 0;
         margin-bottom: 15px;
 		background: rgba(0, 0, 0, 0.3);
@@ -47,8 +49,6 @@
 		padding: 5px 10px;
 		display: flex;
 		align-items: center;
-
-		transition: all 0.2s ease;
 
         /* & span {
 	    	font-size: 0.65rem;

@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { baseState } from "$lib/globalState.svelte";
+	import { STORED_STATE } from "$lib/globalState.svelte";
 	import { displayCalc, displayInfix, doInfixCalc, doPrefixCalc, type InfixOperator, type InfixOrPrefixCalc, type PrefixOperator } from "$lib/mathstuff.svelte";
-    let base = $derived(baseState.base);
+    const base = $derived(STORED_STATE.base);
 
     const NUM_COLUMNS = 3; // visual 3 columns
 
@@ -178,46 +178,44 @@
 <div class="container-container" onkeydown={handleKeyDown} role="application" aria-label="Seximal Calculator">
     <div class="container">
         <header>
-            <span class="brand">{baseState.baseName.toUpperCase()} <span class="model">IT-{base}{base**2-1}D</span></span>
+            <span class="brand">{STORED_STATE.baseName.toUpperCase()} <span class="model">IT-{base}{base**2-1}D</span></span>
         </header>
         <div class="output-area">
             <div class="past-calc">{displayedPastCalc}</div>
             <div class="curr-calc">{displayedCalc}</div>
         </div>
-        <div class="calc-buttons">
-            <div class="area" style:--columns="5">
-                <button class="util" onclick={() => pressPrefixOp("√")}>√</button>
-                <button class="util" onclick={() => pressInfixOp("^")}>xⁿ</button>
-                <button class="util" onclick={() => pressPrefixOp("!")}>x!</button>
-                <button class="util" onclick={() => pressInfixOp("mod")}>mod</button>
-                <button class="util" onclick={() => pressInfixOp("log_")}>logₐ</button>
-                <button class="util" onclick={() => pressPrefixOp("1/")}>¹⁄ₓ</button>
-                <button class="util" onclick={() => pressPrefixOp("%")}>%</button>
-                <button class="util" onclick={() => pressPrefixOp("Sum ")}>Sum</button>
-                <button class="util" onclick={() => pressPrefixOp("Prim ")}>Prim</button>
-                <button class="util" onclick={() => pressPrefixOp("log")}>log</button>
-                <button class="const" onclick={() => loadConstant(Math.E)}>e</button>
-                <button class="const" onclick={() => loadConstant(Math.PI)}>π</button>
-                <button class="const" onclick={() => loadConstant((1 + Math.sqrt(5)) / 2)}>ϕ</button>
+        <div class="calc-buttons" style:--columns="5" style:margin-bottom="25px">
+            <button class="util" onclick={() => pressPrefixOp("√")}>√</button>
+            <button class="util" onclick={() => pressInfixOp("^")}>xⁿ</button>
+            <button class="util" onclick={() => pressPrefixOp("!")}>x!</button>
+            <button class="util" onclick={() => pressInfixOp("mod")}>mod</button>
+            <button class="util" onclick={() => pressInfixOp("log_")}>logₐ</button>
+            <button class="util" onclick={() => pressPrefixOp("1/")}>¹⁄ₓ</button>
+            <button class="util" onclick={() => pressPrefixOp("%")}>%</button>
+            <button class="util" onclick={() => pressPrefixOp("Sum ")}>Sum</button>
+            <button class="util" onclick={() => pressPrefixOp("Prim ")}>Prim</button>
+            <button class="util" onclick={() => pressPrefixOp("log")}>log</button>
+            <button class="const" onclick={() => loadConstant(Math.E)}>e</button>
+            <button class="const" onclick={() => loadConstant(Math.PI)}>π</button>
+            <button class="const" onclick={() => loadConstant((1 + Math.sqrt(5)) / 2)}>ϕ</button>
+        </div>
+        <div style:display="flex" style:justify-content="center" style:gap="25px">
+            <div class="calc-buttons" style:--columns={NUM_COLUMNS}>
+                {#each digits as number }
+                    <button class="digit" onclick={() => pressNum(number)}>{number.toString(36)}</button>
+                {/each}
+                <button class="digit"
+                    onclick={pressDecimalMode}
+                    style:grid-column="span {equals_span}"
+                >.</button>
             </div>
-            <div style:display="flex" style:justify-content="center" style:gap="25px">
-                <div class="area" style:--columns={NUM_COLUMNS}>
-                    {#each digits as number }
-                        <button class="digit" onclick={() => pressNum(number)}>{number.toString(36)}</button>
-                    {/each}
-                    <button class="digit"
-                        onclick={pressDecimalMode}
-                        style:grid-column="span {equals_span}"
-                    >.</button>
-                </div>
-                <div class="area" style:--columns="2" style:margin-bottom="25px">
-                    <button class="util" onclick={() => pressInfixOp("*")}>*</button>
-                    <button class="util" onclick={() => pressInfixOp("÷")}>÷</button>
-                    <button class="util" onclick={() => pressInfixOp("+")}>+</button>
-                    <button class="util" onclick={() => pressInfixOp("-")}>-</button>
-                    <button class="ac" onclick={clearInput}>AC</button>
-                    <button class="equals" onclick={pressEquals}>=</button>
-                </div>
+            <div class="calc-buttons" style:--columns="2">
+                <button class="util" onclick={() => pressInfixOp("*")}>*</button>
+                <button class="util" onclick={() => pressInfixOp("÷")}>÷</button>
+                <button class="util" onclick={() => pressInfixOp("+")}>+</button>
+                <button class="util" onclick={() => pressInfixOp("-")}>-</button>
+                <button class="ac" onclick={clearInput}>AC</button>
+                <button class="equals" onclick={pressEquals}>=</button>
             </div>
         </div>
     </div>
@@ -274,22 +272,6 @@
             font-size: 1rem;
             color: var(--color-theme-4);
             opacity: 0.7;
-        }
-    }
-
-    .calc-buttons {
-        display: flex;
-        justify-content: center;
-        flex-direction: column;
-        gap: 25px;
-        --button-size: 60px;
-        
-        & .area {
-            display: grid;
-            justify-content: center;
-            gap: 10px;
-            align-content: baseline;
-            grid-template-columns: repeat(var(--columns), var(--button-size));
         }
     }
 </style>
