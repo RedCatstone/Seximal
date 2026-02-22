@@ -1,23 +1,22 @@
 <script lang="ts">
-	import { STORED_STATE } from "$lib/globalState.svelte";
-	import { ceilWithPrecision, displayCalc, displayKeypadNum, displayNumber, doCalc, floorWithPrecision, type InfixOperator, type InfixOrPrefixCalc } from "$lib/mathstuff.svelte";
-	import { untrack } from "svelte";
+	import { getBaseName, STORED_STATE } from "$lib/globalState.svelte";
+	import { displayCalc, displayKeypadNum, displayNumber, doCalc, type InfixOperator, type InfixOrPrefixCalc } from "$lib/mathstuff.svelte";
 	import NumKeypad from "./reuseable/NumKeypad.svelte";
     const base = $derived(STORED_STATE.base);
 
-    let pastQuestions = $state<{ question: InfixOrPrefixCalc, answer: number }[]>([]);
+    let currGameBase: number | null = $state(null);
+    let pastQuestions: { question: InfixOrPrefixCalc, answer: number }[] = $state([]);
+    let currQuestion: InfixOrPrefixCalc = $state(generateQuestion());
 
-    let currQuestion = $state<InfixOrPrefixCalc>(generateQuestion());
-
-    let keypadInputNum = $state(0);
-    let keypadDecimal = $state<number | null>(null);
+    let keypadInputNum: number | null = $state(null);
+    let keypadDecimal: number | null = $state(null);
 
     // timestamp when the timer runs out
-    let timeLeftMs = $state<number | null>(null);
+    let timeLeftMs: number | null = $state(null);
     let gameOver = $state(false);
-    const TIMER_MAX_TIME = 10_000;
-    const TIMER_SUCCESS = 3_000;
-    const TIMER_FAIL = -1_000;
+    const TIMER_MAX_TIME = 18_000;
+    const TIMER_SUCCESS = 2_000;
+    const TIMER_FAIL = -500;
     
     let scrollAnchor = $state<HTMLElement | null>(null);
 
@@ -46,14 +45,14 @@
     function submitAnswer() {
         if (gameOver) return;
         const answer = doCalc(currQuestion);
-        console.log(keypadInputNum, answer);
         if (Array.isArray(answer)) throw new Error("huh?");
 
-        if (Math.abs(keypadInputNum - answer) < 0.0001) {
+        if (keypadInputNum != null && Math.abs(keypadInputNum - answer) < 0.0001) {
             // correct!!
             if (timeLeftMs == null) {
                 // start the timer
                 timeLeftMs = TIMER_MAX_TIME;
+                currGameBase = base;
             } else {
                 timeLeftMs += TIMER_SUCCESS;
             }
@@ -71,11 +70,12 @@
     $effect(() => {
         // "read" the length to create a dependency
         pastQuestions.length;
-        if (scrollAnchor) scrollAnchor.scrollIntoView({ behavior: 'instant', block: 'start' });
+        scrollAnchor!.scrollIntoView({ behavior: 'instant', block: 'start' });
     });
 
     // timer effect
     $effect(() => {
+        // "read" the timeLeftMs to create a dependency
         timeLeftMs;
         let previousFrameTimestamp = performance.now();
         let frame = requestAnimationFrame(function tick(timestamp: DOMHighResTimeStamp) {
@@ -96,10 +96,10 @@
 
     // game-over on base switch
     $effect(() => {
-        base;
-        untrack(() => {
-            if (timeLeftMs != null) makeGameOver()
-        });
+        if (currGameBase != null && base != currGameBase) {
+            // switched base mid game...
+            makeGameOver();
+        }
     })
 
     function makeGameOver() {
@@ -110,73 +110,54 @@
         if (!Array.isArray(answer)) {
             keypadInputNum = answer;
         }
-        if (pastQuestions.length > (STORED_STATE.quickMathsHighscores[base] ?? 0)) {
-            STORED_STATE.quickMathsHighscores[base] = pastQuestions.length;
+        if (pastQuestions.length > (STORED_STATE.quickMathsHighscores[currGameBase!] ?? 0)) {
+            STORED_STATE.quickMathsHighscores[currGameBase!] = pastQuestions.length;
         }
     }
 
     function retry() {
         gameOver = false;
         timeLeftMs = null;
-        keypadDecimal = null;
-        keypadInputNum = 0;
+        currGameBase = null;
+        clearInput();
         pastQuestions.length = 0;
         currQuestion = generateQuestion();
     }
 
     function handleKeyDown(e: KeyboardEvent) {
+        const target = e.target as HTMLElement;
+        if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.contentEditable === 'true') return;
+
         const k = e.key;
         if (k == 'Enter') submitAnswer();
         else if (k == '-') pressMinus();
-        else if (k == 'Delete' || k == 'Escape') clearInput();
-        else if (k == 'Backspace') pressBackspace();
-        else return
-        e.preventDefault();
     }
     function clearInput() {
         if (gameOver) return;
-        keypadInputNum = 69420;
-        keypadInputNum = 0;
+        keypadInputNum = null;
         keypadDecimal = null;
-    }
-    function pressBackspace() {
-        if (gameOver) return;
-        if (keypadDecimal != null) {
-            if (keypadDecimal <= 1) keypadDecimal = null;
-            else {
-                keypadDecimal -= 1;
-                if (keypadInputNum < 0) keypadInputNum = ceilWithPrecision(keypadInputNum, keypadDecimal - 1);
-                else keypadInputNum = floorWithPrecision(keypadInputNum, keypadDecimal - 1);
-            }
-        }
-        else if (keypadInputNum == 0) clearInput();
-        else if (keypadInputNum < 0) keypadInputNum = Math.ceil(keypadInputNum / base);
-        else keypadInputNum = Math.floor(keypadInputNum / base);
     }
 
     function pressMinus() {
         if (gameOver) return;
-        if (keypadInputNum === 0) {
-            const isNegative = Object.is(keypadInputNum, -0);
-            keypadInputNum = 69420; // needed to update sveltes state on -0, 0
-            keypadInputNum = isNegative ? 0 : -0;
-        } else {
-            keypadInputNum *= -1;
-        }
+        if (keypadInputNum == null) keypadInputNum = 0;
+
+        const before = keypadInputNum;
+        keypadInputNum = 69420; // needed to update sveltes state on -0, 0
+        keypadInputNum = -before;
     }
 </script>
 
 <svelte:window onkeydown={handleKeyDown} />
-
 <div class="container-container" class:game-over={gameOver} style:--questions={pastQuestions.length}>
     <div class="questions" bind:this={scrollAnchor}>
         {#each pastQuestions as question, i }
-            <span style:--i={i}>{`${displayCalc(question.question)} = ${displayNumber(question.answer)}`}</span>
+            <span data-number={(i+1).toString(base)} style:--i={i}>{`${displayCalc(question.question)} = ${displayNumber(question.answer)}`}</span>
         {/each}
 
         <div class="curr-question">
-            <span>{displayCalc(currQuestion) + ' ='}</span>
-            <span class="input-num">{displayKeypadNum(keypadInputNum, keypadDecimal)}</span>
+            <span data-number={(pastQuestions.length+1).toString(base)}>{displayCalc(currQuestion) + ' ='}</span>
+            <div class="input-num">{keypadInputNum != null ? displayKeypadNum(keypadInputNum, keypadDecimal) : ''}</div>
         </div>
     </div>
     {#if timeLeftMs != null }
@@ -187,13 +168,16 @@
     {/if}
     {#if gameOver }
         <div class="game-over-msg">
-            You got <span class="questions-correct">{pastQuestions.length}</span> <span>{STORED_STATE.baseName}</span> Question{pastQuestions.length == 1 ? '' : 's'} correct!
-            <br>(Best: {STORED_STATE.quickMathsHighscores[base]})
+            You got
+                <span class="questions-correct">{pastQuestions.length.toString(base)}</span>
+                <span>{getBaseName(currGameBase!)}</span>
+                Question{pastQuestions.length == 1 ? '' : 's'} correct!
+            <br>(Best: {STORED_STATE.quickMathsHighscores[currGameBase!].toString(base)})
             <button class="util" onclick={retry}>Retry</button>
         </div>
     {/if}
     <div class="num-keypad" bind:this={scrollAnchor}>
-        <NumKeypad columns={3} bind:inputNum={keypadInputNum} bind:decimalDigit={keypadDecimal} disabled={gameOver} />
+        <NumKeypad columns={3} bind:inputNum={keypadInputNum} bind:decimalDigit={keypadDecimal} {clearInput} disabled={gameOver} />
         <div class="calc-buttons">
             <button class="ac" onclick={clearInput}>AC</button>
             <button class="equals" onclick={submitAnswer}>=</button>
@@ -225,20 +209,25 @@
             color: hsl(from var(--color-theme-1)  calc(h + calc(4 * var(--i)))  s l);
         }
 
-        & > *::before {
-            counter-increment: q;
-            content: counter(q)'. ';
+        & span::before {
+            /* counter-increment: q; */
+            content: attr(data-number) '. ';
             color: var(--color-bg-2);
             font-size: 1.4rem;
         }
 
         & .input-num {
             display: inline-block;
+            white-space: nowrap;
             width: clamp(40px, 18vw, 100px);
             padding: 0 5px;
 
             color: var(--color-theme-2);
             border-bottom: 2px solid var(--color-bg-2);
+            margin-bottom: -2px;
+            
+            /* border doesn't shift when content is '' */
+            vertical-align: bottom;
         }
     }
 
@@ -266,7 +255,7 @@
     .timer-stuff {
         --timer-color: hsl(from var(--questions-color) calc(h + 200) s l);
         color: var(--timer-color);
-        font-size: 2rem;
+        font-size: 1.5rem;
 
         display: flex;
         align-items: center;
@@ -288,6 +277,7 @@
                 position: absolute;
                 border-radius: inherit;
                 background: var(--timer-color);
+                opacity: 0.5;
             }
         }
     }

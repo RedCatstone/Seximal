@@ -1,21 +1,8 @@
 <script lang="ts">
 	import { STORED_STATE } from "$lib/globalState.svelte";
 	import { displayCalc, displayInfix, doInfixCalc, doPrefixCalc, type InfixOperator, type InfixOrPrefixCalc, type PrefixOperator } from "$lib/mathstuff.svelte";
+	import NumKeypad from "./reuseable/NumKeypad.svelte";
     const base = $derived(STORED_STATE.base);
-
-    const NUM_COLUMNS = 3; // visual 3 columns
-
-    const digits = $derived((() => {
-        let numbers = Array.from({ length: base-1 }, (_, i) => i+1);  // 1 2 3 ...
-        let ordered_digits = [];  // with NUM_COLUMNS = 3: 7 8 9 4 5 6 1 2 3 0
-
-        while (numbers.length) {
-            ordered_digits.push(...numbers.splice(-NUM_COLUMNS));
-        }
-        ordered_digits.push(0);
-        return ordered_digits
-    })());
-    const equals_span = $derived(NUM_COLUMNS - (base % NUM_COLUMNS) || NUM_COLUMNS);
 
 
     // ------------------------------
@@ -43,34 +30,6 @@
         inputRight = 0;
         decimalDigit = null;
         pastCalc = null;
-    }
-
-    function pressBackspace() {
-        if (inputRight == null || inputRight == 0) clearInput();
-        else inputRight = Math.floor(inputRight / base)
-    }
-
-    function pressNum(n: number) {
-        pastCalc = null;
-        if (inputRight == null) {
-            if (currInfixOp == null) {
-                inputLeft = null;
-            }
-            inputRight = n;
-        } else {
-            if (decimalDigit == null) {
-                if (inputRight < 0 || Object.is(inputRight, -0)) {
-                    inputRight = inputRight * base - n;
-                }
-                else inputRight = inputRight * base + n;
-            } else {
-                if (inputRight < 0 || Object.is(inputRight, -0)) {
-                    inputRight -= n / (base**decimalDigit);
-                }
-                else inputRight += n / (base**decimalDigit);
-                decimalDigit += 1;
-            }
-        }
     }
 
     function pressInfixOp(op: InfixOperator) {
@@ -139,12 +98,6 @@
         decimalDigit = null;
     }
 
-    function pressDecimalMode() {
-        if (decimalDigit == null && inputRight != null) {
-            decimalDigit = 1
-        }
-    }
-
     function loadConstant(n: number) {
         pastCalc = null;
         if (currInfixOp == null) {
@@ -155,27 +108,20 @@
     }
 
     function handleKeyDown(e: KeyboardEvent) {
+        const target = e.target as HTMLElement;
+        if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.contentEditable === 'true') return;
         const k = e.key;
-
-        // Numbers
-        const parsed = parseInt(k, 36);
-        if (!isNaN(parsed) && parsed < base) {
-            pressNum(parsed);
-        }
-        else if (k == '+' || k == '-' || k == '*' || k == '^') pressInfixOp(k);
+        if (k == '+' || k == '-' || k == '*' || k == '^') pressInfixOp(k);
         else if (k == '/') pressInfixOp('÷');
-        else if (k == 'Enter' || k == '=') pressEquals();
-        else if (k == '.' || k == ',') pressDecimalMode();
-        else if (k == 'Delete' || k == 'Escape') clearInput();
-        else if (k == 'Backspace') pressBackspace();
         else if (k == '!') pressPrefixOp('!');
-        else return
-        e.preventDefault()
+        else if (k == 'Enter' || k == '=') pressEquals();
+        else return;
+        e.preventDefault();
     }
 </script>
 
-<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-<div class="container-container" onkeydown={handleKeyDown} role="application" aria-label="Seximal Calculator">
+<svelte:window onkeydown={handleKeyDown} />
+<div class="container-container" role="application" aria-label="Seximal Calculator">
     <div class="container">
         <header>
             <span class="brand">{STORED_STATE.baseName.toUpperCase()} <span class="model">IT-{base}{base**2-1}D</span></span>
@@ -200,15 +146,7 @@
             <button class="const" onclick={() => loadConstant((1 + Math.sqrt(5)) / 2)}>ϕ</button>
         </div>
         <div style:display="flex" style:justify-content="center" style:gap="25px">
-            <div class="calc-buttons" style:--columns={NUM_COLUMNS}>
-                {#each digits as number }
-                    <button class="digit" onclick={() => pressNum(number)}>{number.toString(36)}</button>
-                {/each}
-                <button class="digit"
-                    onclick={pressDecimalMode}
-                    style:grid-column="span {equals_span}"
-                >.</button>
-            </div>
+            <NumKeypad columns={3} bind:inputNum={inputRight} bind:decimalDigit={decimalDigit} {clearInput} onDeNull={() => { if (currInfixOp == null) clearInput() }}/>
             <div class="calc-buttons" style:--columns="2">
                 <button class="util" onclick={() => pressInfixOp("*")}>*</button>
                 <button class="util" onclick={() => pressInfixOp("÷")}>÷</button>

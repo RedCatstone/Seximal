@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { STORED_STATE } from "$lib/globalState.svelte";
+	import { ceilWithPrecision, floorWithPrecision } from "$lib/mathstuff.svelte";
     const base = $derived(STORED_STATE.base);
 
-    let { columns, inputNum=$bindable(), decimalDigit=$bindable(), disabled = false }:
-        { columns: number, inputNum: number, decimalDigit: number | null, disabled?: boolean } = $props();
+    let { columns, inputNum=$bindable(), decimalDigit=$bindable(), clearInput, onDeNull, disabled=false }:
+        { columns: number, inputNum: number | null, decimalDigit: number | null, clearInput: () => void, onDeNull?: () => void, disabled?: boolean } = $props();
 
 
     const digits = $derived((() => {
@@ -21,6 +22,10 @@
 
     function pressNum(n: number) {
         if (disabled) return;
+        if (inputNum == null) {
+            if (onDeNull) onDeNull();
+            inputNum = 0;
+        }
         if (decimalDigit == null) {
             if (inputNum < 0 || Object.is(inputNum, -0)) {
                 inputNum = inputNum * base - n;
@@ -42,19 +47,36 @@
         }
     }
 
+    function pressBackspace() {
+        if (disabled) return;
+        if (inputNum == null) return clearInput();
+
+        if (decimalDigit != null) {
+            if (decimalDigit <= 1) decimalDigit = null;
+            else {
+                decimalDigit -= 1;
+                if (inputNum < 0) inputNum = ceilWithPrecision(inputNum, decimalDigit - 1);
+                else inputNum = floorWithPrecision(inputNum, decimalDigit - 1);
+            }
+        }
+        else if (inputNum == 0) clearInput();
+        else if (inputNum < 0) inputNum = Math.ceil(inputNum / base);
+        else inputNum = Math.floor(inputNum / base);
+    }
+
     function handleKeyDown(e: KeyboardEvent) {
+        const target = e.target as HTMLElement;
+        if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.contentEditable === 'true') return;
         const k = e.key;
         const parsed = parseInt(k, 36);
-        if (!isNaN(parsed) && parsed < base) {
-            pressNum(parsed);
-        }
+        if (!isNaN(parsed) && parsed < base) pressNum(parsed);
         else if (k == '.' || k == ',') pressDecimalMode();
-        else return
+        else if (k == 'Delete' || k == 'Escape') clearInput();
+        else if (k == 'Backspace') pressBackspace();
     }
 </script>
 
 <svelte:window onkeydown={handleKeyDown} />
-
 <div class="calc-buttons">
     <div class="calc-buttons" style:--columns={columns}>
         {#each digits as number }

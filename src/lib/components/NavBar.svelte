@@ -3,30 +3,30 @@
     import { resolve } from '$app/paths';
 </script>
 
-<nav class="container">
-	<div class="links">
-        <a href={resolve("/counting")} class:active={page.url.pathname === resolve("/counting")}>
-            Counting
-        </a>
-		<a href={resolve("/calculator")} class:active={page.url.pathname === resolve("/calculator")}>
-			Calculator
-		</a>
-		<a href={resolve("/quickmaths")} class:active={page.url.pathname === resolve("/quickmaths")}>
-			Quick Maths
-		</a>
-	</div>
-</nav>
+<div class="container-container">
+	<nav class="container">
+		<div class="links">
+			<a href={resolve("/counting")} class:active={page.url.pathname === resolve("/counting")}>Counting</a>
+	        <a href={resolve("/patterns")} class:active={page.url.pathname === resolve("/patterns")}>Patterns</a>
+			<a href={resolve("/calculator")} class:active={page.url.pathname === resolve("/calculator")}>Calculator</a>
+			<a href={resolve("/quickmaths")} class:active={page.url.pathname === resolve("/quickmaths")}>Quick Maths</a>
+		</div>
+	</nav>
+</div>
 
 <style>
-	.container {
+	.container-container {
 		display: flex;
 		justify-content: center;
-		overflow-x: auto;
-
-		padding: 10px 0;
-        margin-bottom: 15px;
 		background: rgba(0, 0, 0, 0.3);
+        margin-bottom: 5px;
 		border-bottom: 1px solid var(--color-bg-1);
+		padding: 10px 0;
+	}
+
+	.container {
+		display: flex;
+		overflow-x: auto;
 	}
 
 	.links {

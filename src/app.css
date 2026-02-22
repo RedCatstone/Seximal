@@ -4,6 +4,7 @@
 	--color-bg-2: #555;
 	--color-text: #e0e0e0;
 	--color-text-dim: #777;
+	--color-text-kinda-dim: #999;
 	--color-theme-1: #f74242;
 	--color-theme-2: #f1ad46;
 	--color-theme-3: #7adf7f;
@@ -11,9 +12,21 @@
 
     background: var(--color-bg-0);
     color: var(--color-text);
-	scrollbar-color: var(--color-bg-2) var(--color-bg-1);
+	scrollbar-color: var(--color-theme-2) transparent;
 	scrollbar-width: thin;
 }
+
+
+
+h1 {
+	font-size: 1.7rem;
+	color: var(--color-theme-2);
+	margin: 5px 0;
+	letter-spacing: 2px;
+}
+
+
+
 
 
 input[type="number"] {
@@ -34,6 +47,9 @@ input[type="number"] {
 		-webkit-appearance: none;
 		margin: 0;
 	}
+}
+.active input {
+	border: 1px solid var(--color-theme-2);
 }
 
 
@@ -101,7 +117,10 @@ button {
 .table-container {
 	overflow: auto; /* so the table itself scrolls */
 	max-height: 600px;
-	max-width: 90vw;
+	width: 100%;
+	scrollbar-width: thin;
+	background: black;
+	border: 1px solid var(--color-bg-1);
 
 
 	& span {
@@ -112,49 +131,63 @@ button {
 	& table {
 		user-select: none;
 		border-collapse: collapse;
+		border-spacing: 0;
 		font-family: 'JetBrains Mono', monospace;
 		color: var(--color-text-dim);
 		font-size: 0.8rem;
-		background: rgba(0, 0, 0, 0.3);
+		width: 100%;
 
-		overflow: hidden;
+		/* overflow: hidden would break the header stickiness, so we using this now. */
+		contain: paint;
 		border-spacing: 0;
 
 		& th {
-			padding: 4px 10px;
+			position: sticky;
+			background: black;
+			top: 0;
+			left: 0;
+			z-index: 1;
+			padding: 4px;
 			color: var(--color-theme-2);
 		}
-
-		& tr:hover td {
-			background: rgba(255, 255, 255, 0.03);
+		& tr:first-child th:first-child {
+		    z-index: 2;
 		}
 
 		& td {
-			padding: 4px 10px;
+			padding: 4px;
+			font-size: 0.85rem;
 			text-align: center;
 			border: 1px solid #222;
 			position: relative;
 				
-			&.prime, &.multiple, &.square, &.hashard {
+			&.highlighted {
 				color: var(--color-theme-3);
-				background: rgb(from var(--color-theme-3) R G B / 0.2);
+				background: rgb(from var(--color-theme-3) R G B / 0.3);
 				font-weight: bold;
-			}
-
-			&:hover {
-				color: var(--color-text);
 			}
 		}
 
-		& td:hover::after { 
-			position: absolute;
-			pointer-events: none;
-			content: '';
-			height: 200vh;
-			top: -100vh;
-			left: 0;
-			width: 100%;
-			background: rgba(255, 255, 255, 0.03);
+		& td:hover {
+			&::after, &::before {
+				position: absolute;
+				pointer-events: none;
+				content: '';
+				background: rgba(255, 255, 255, 0.08);
+			}
+			&::after {
+				height: 200vh;
+				top: -100vh;
+				left: 0;
+				width: 100%;
+
+			}
+			&::before {
+				width: 200vw;
+				left: -100vw;
+				top: 0;
+				height: 100%;
+			}
 		}
 	}
 }

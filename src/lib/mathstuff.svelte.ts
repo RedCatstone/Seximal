@@ -117,8 +117,45 @@ function gamma(n: number): number {
     }
 }
 
-function primeFactors(n: number): number[] | number {
-    if (n <= 1) return NaN;
+export function gcd(a: number, b: number): number {
+    while (b) [a, b] = [b, a % b];
+    return a;
+}
+
+export function modInverse(a: number, mod: number): number | null {
+    // standardize a to be within [0, mod)
+    a = ((a % mod) + mod) % mod;
+
+    // SLOW O(n)
+    // for (let x = 1; x < mod; x++) {
+    //     if ((k * x) % mod === 1) return x;
+    // }
+    // return null;
+
+    // FAST O(log n)
+    // Extended Euclidean Algorithm
+    // solve: a*x + mod*y = gcd(a, mod)
+    // if gcd (a) is 1, then x is the inverse.
+    let b = mod;
+    let x = 0, lastX = 1;
+    let y = 1, lastY = 0;
+
+    while (b !== 0) {
+        let quotient = Math.floor(a / b);
+        
+        [a, b] = [b, a % b];  // Update a and b (Standard Euclidean)
+        [x, lastX] = [lastX - quotient * x, x];  // Update x (Tracking the coefficients)
+        [y, lastY] = [lastY - quotient * y, y];
+    }
+
+    // inverse exists only if gcd (a) is 1
+    if (a !== 1) return null;
+    // lastX could be negative, so bring it back into [0, mod)
+    return ((lastX % mod) + mod) % mod;
+}
+
+export function primeFactors(n: number): number[] {
+    if (n <= 1) return [NaN];
     const factors = [];
     let divisor = 2;
     while (n >= 2) {
@@ -126,10 +163,39 @@ function primeFactors(n: number): number[] | number {
             factors.push(divisor);
             n /= divisor;
         }
-        else if (divisor > 10_000_000) return NaN;
+        else if (divisor > 10_000_000) return [NaN];
         else divisor++;
     }
     return factors;
+}
+export function primePowerComponents(n: number): number[] {
+    const newFactors = [];
+    let last = 0;
+    for (const factor of primeFactors(n)) {
+        if (last == factor) newFactors[newFactors.length - 1] *= factor;
+        else newFactors.push(factor);
+        last = factor;
+    }
+    return newFactors;
+}
+export function getTrailingAndCoprime(n: number): number[] {
+    if (n === 1) return [1];
+    let trailing = 1;
+    let coprime = n;
+    const basePrimes = primeFactors(base);
+    // Pull factors out of n
+    let changed = true;
+    while (changed) {
+        changed = false;
+        for (const p of basePrimes) {
+            if (coprime % p === 0) {
+                trailing *= p;
+                coprime /= p;
+                changed = true;
+            }
+        }
+    }
+    return [trailing, coprime].filter(x => x !== 1);
 }
 
 // Source - https://stackoverflow.com/a/40200710
@@ -156,4 +222,22 @@ export function floorWithPrecision(num: number, precision: number): number {
 export function ceilWithPrecision(num: number, precision: number): number {
     const factor = base ** precision;
     return Math.ceil(num * factor) / factor;
+}
+
+
+
+
+export function isHappyNumber(n: number): boolean {
+    if (n <= 0) return false;
+    // same number twice => unhappy loop
+    let seen = new Set();
+    let current = n;
+
+    while (current !== 1 && !seen.has(current)) {
+        seen.add(current);
+        // get the basedigits and sum the squares
+        current = current.toString(base).split('').map(d => parseInt(d, base)).reduce((sum, digit) => sum + (digit * digit), 0);
+    }
+    // if it exited because current is 1, happy!
+    return current === 1;
 }

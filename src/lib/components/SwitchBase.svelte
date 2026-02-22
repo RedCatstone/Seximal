@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { STORED_STATE, getBaseName } from "$lib/globalState.svelte";
 
-    const PRESET_BASES = [4, 6, 10, 12, 16];
+    const PRESET_BASES = [6, 10, 12, 16];
     let customInputValue = $state("");
 
     function changeBase(b: number) {
@@ -60,7 +60,7 @@
         display: flex;
         align-items: center;
         gap: 5px;
-        margin-bottom: 10px;
+        margin-bottom: 2px;
         padding: 8px 16px;
         border: 2px solid var(--color-bg-1);
     }
@@ -119,9 +119,6 @@
         }
         & input {
             width: 50px;
-        }
-        &.active input {
-            border: 1px solid var(--color-theme-2);
         }
     }
 </style>
