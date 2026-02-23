@@ -82,7 +82,7 @@
             border: transparent;
             cursor: pointer;
 
-            color: var(--color-text-dim);
+            color: var(--color-text-kinda-dim);
             font-size: 0.8rem;
             font-weight: 500;
 

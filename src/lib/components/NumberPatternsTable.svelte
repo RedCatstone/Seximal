@@ -143,7 +143,7 @@
             <div><Checkbox checked={mode === 'harshard'} onchange={() => changeMode('harshard')} label="Harshard"/></div>
             <div><Checkbox checked={mode === 'happy'} onchange={() => changeMode('happy')} label="Happy"/></div>
             <div class:active={typeof mode === 'number'}>
-                <span>Multiples of</span>
+                <label for="multiples-of">Multiples of</label>
                 <input type="number"
                     id="multiples-of"
                     style:width="30px"
@@ -172,6 +172,7 @@
             <br><span class="example">{((base - 1) * 2).toString(base)} is Harshad because it's divisible by {(base - 1).toString(base)} = (1 + {(base - 2).toString(base)}).</span>
         {:else if mode == 'happy' }
             <span><strong>Happy Numbers</strong>  are integers that eventually reach 1 when replaced by the sum of the square of their digits repeatedly.</span>
+            <br><span class="example">10 is Happy because 1² + 0² = 1.</span>
         {:else if typeof mode === 'number'}
             {@const rules = divisibilityRulesAll(mode)}
             <div class="rules-container">
@@ -179,7 +180,7 @@
                     <Checkbox bind:checked={DIV_RULES_COMBINE} label={'Combine Rules'}/>
                 {/if}
                 {#if rules.length > 1}
-                    <span class="rule-target">A number is divisible by {mode.toString(base)} if it passes the checks for {displayOrArray(rules.map(([x, _]) => x), "and")}</span>
+                    <span class="rule-target">A number is divisible by {mode.toString(base)} if it is divisible by {displayOrArray(rules.map(([x, _]) => x), "and")}:</span>
                 {/if}
                 {#each rules as [n, rulesForN]}
                     <span class="rule-target">Rule{rulesForN.length === 1 ? '' : 's'} for {n.toString(base)}:</span>
@@ -250,7 +251,7 @@
 
     .highlighter-toggles {
 		font-size: 0.8rem;
-		color: var(--color-text-dim);
+		color: var(--color-text-kinda-dim);
 		letter-spacing: 0.5px;
         
         display: flex;

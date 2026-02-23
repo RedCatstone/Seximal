@@ -121,10 +121,10 @@
 </script>
 
 <svelte:window onkeydown={handleKeyDown} />
-<div class="container-container" role="application" aria-label="Seximal Calculator">
+<main class="container-container" role="application" aria-label="Seximal Calculator">
     <div class="container">
         <header>
-            <span class="brand">{STORED_STATE.baseName.toUpperCase()} <span class="model">IT-{base}{base**2-1}D</span></span>
+            <span class="brand">{STORED_STATE.baseName.toUpperCase()} IT-{(69).toString(base)}D</span>
         </header>
         <div class="output-area">
             <div class="past-calc">{displayedPastCalc}</div>
@@ -157,7 +157,7 @@
             </div>
         </div>
     </div>
-</div>
+</main>
 
 <style>
     .container-container {

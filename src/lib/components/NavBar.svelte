@@ -3,7 +3,7 @@
     import { resolve } from '$app/paths';
 </script>
 
-<div class="container-container">
+<nav class="container-container">
 	<nav class="container">
 		<div class="links">
 			<a href={resolve("/counting")} class:active={page.url.pathname === resolve("/counting")}>Counting</a>
@@ -12,7 +12,7 @@
 			<a href={resolve("/quickmaths")} class:active={page.url.pathname === resolve("/quickmaths")}>Quick Maths</a>
 		</div>
 	</nav>
-</div>
+</nav>
 
 <style>
 	.container-container {
@@ -39,7 +39,7 @@
 	a {
 		text-decoration: none;
 
-		color: var(--color-text-dim, #666);
+		color: var(--color-text-kinda-dim, #666);
 		font-family: 'JetBrains Mono', monospace;
 		font-size: 0.85rem;
 		font-weight: 600;

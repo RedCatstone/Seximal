@@ -149,7 +149,7 @@
 </script>
 
 <svelte:window onkeydown={handleKeyDown} />
-<div class="container-container" class:game-over={gameOver} style:--questions={pastQuestions.length}>
+<main class="container-container" class:game-over={gameOver} style:--questions={pastQuestions.length}>
     <div class="questions" bind:this={scrollAnchor}>
         {#each pastQuestions as question, i }
             <span data-number={(i+1).toString(base)} style:--i={i}>{`${displayCalc(question.question)} = ${displayNumber(question.answer)}`}</span>
@@ -184,7 +184,7 @@
             <button class="digit" onclick={pressMinus}>-</button>
         </div>
     </div>
-</div>
+</main>
 
 <style>
     .container-container {

@@ -12,7 +12,6 @@
 
     background: var(--color-bg-0);
     color: var(--color-text);
-	scrollbar-color: var(--color-theme-2) transparent;
 	scrollbar-width: thin;
 }
 
@@ -83,7 +82,7 @@ button {
 
 	&.disabled {
 		pointer-events: none;
-		opacity: 0.5;
+		opacity: 0.6;
 	}
 
 	&.digit {
@@ -116,6 +115,7 @@ button {
 
 .table-container {
 	overflow: auto; /* so the table itself scrolls */
+	scrollbar-color: var(--color-theme-2) transparent;
 	max-height: 600px;
 	width: 100%;
 	scrollbar-width: thin;

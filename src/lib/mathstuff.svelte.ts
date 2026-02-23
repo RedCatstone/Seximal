@@ -123,6 +123,7 @@ export function gcd(a: number, b: number): number {
 }
 
 export function modInverse(a: number, mod: number): number | null {
+    if (isNaN(a) || isNaN(mod)) return null;
     // standardize a to be within [0, mod)
     a = ((a % mod) + mod) % mod;
 
