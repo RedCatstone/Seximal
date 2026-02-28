@@ -6,8 +6,7 @@
 <nav class="container-container">
 	<nav class="container">
 		<div class="links">
-			<a href={resolve("/counting")} class:active={page.url.pathname === resolve("/counting")}>Counting</a>
-	        <a href={resolve("/patterns")} class:active={page.url.pathname === resolve("/patterns")}>Patterns</a>
+	        <a href={resolve("/counting")} class:active={page.url.pathname === resolve("/counting")}>Counting</a>
 			<a href={resolve("/calculator")} class:active={page.url.pathname === resolve("/calculator")}>Calculator</a>
 			<a href={resolve("/quickmaths")} class:active={page.url.pathname === resolve("/quickmaths")}>Quick Maths</a>
 		</div>

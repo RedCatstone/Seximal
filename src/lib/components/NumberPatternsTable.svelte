@@ -90,7 +90,7 @@
                 const easierInverse = (n - multK < multK) ? multK - n : multK;
                 if (k === 1 || Math.abs(easierInverse) === 1 || (DIV_RULES_DISPLAY_ALL && rules.length < 100)) {
 
-                    const example = k === 1 ? generateDigitSumExample(n, easierInverse) : undefined;
+                    const example = k === 1 || (k <= 2 && Math.abs(easierInverse) === 1) ? generateDigitSumExample(n, easierInverse, k) : undefined;
                     rules.push({
                         type: 'universal digit sum',
                         multiplyBy: easierInverse,
@@ -109,15 +109,19 @@
         return rules;
     }
 
-    function generateDigitSumExample(n: number, multiplyBy: number): string {
+    function generateDigitSumExample(n: number, multiplyBy: number, groupDigits: number): string {
         const num = 17 * n;
         if (multiplyBy === 1) {
-            return `${num.toString(base)} ➔ ${num.toString(base).split('').join(' + ')} \
-                = ${num.toString(base).split('').map(x => parseInt(x, base)).reduce((tot, x) => tot + x, 0).toString(base)} which is divisble by ${n.toString(base)}`
+            // "18232", 2 -> "1 + 82 + 32"
+            const grouped = num.toString(base).match(new RegExp(`.{1,${groupDigits}}(?=(.{${groupDigits}})*$)`, "g"))!
+
+            return `${num.toString(base)} ➔ ${grouped.join(' + ')} \
+                = ${grouped.map(x => parseInt(x, base)).reduce((tot, x) => tot + x, 0).toString(base)} which is divisble by ${n.toString(base)}`
         } else {
-            const [leftDigits, rightDigit] = [Math.floor(num / base), num % base];
-            return `${num.toString(base)} ➔ ${leftDigits.toString(base)} ${multiplyBy < 0 ? '-' : '+'} ${rightDigit.toString(base)}${multiplyBy === -1 ? '' : ` * ${Math.abs(multiplyBy)}`} \
-                = ${(leftDigits + multiplyBy * rightDigit).toString(base)} which is divisble by ${n.toString(base)}`
+            const [leftDigits, rightDigits] = [Math.floor(num / base**groupDigits), num % base**groupDigits];
+            return `${num.toString(base)} ➔ ${leftDigits.toString(base)} ${multiplyBy < 0 ? '-' : '+'} \
+                ${rightDigits.toString(base)}${multiplyBy === -1 ? '' : ` * ${Math.abs(multiplyBy).toString(base)}`} \
+                = ${(leftDigits + multiplyBy * rightDigits).toString(base)} which is divisble by ${n.toString(base)}`
         }
     }
 
@@ -154,25 +158,31 @@
             </div>
         </div>
         {#if mode == 'prime' }
-            <span><strong>Prime Numbers</strong> are integers divisible only by 1 and itself. (greater than 1)</span>
-            <span>Every integer (greater than 1) can be uniquely split into its prime factors. Example: {primeFactors(base).map(x => x.toString(base)).join(' * ')} = 10.</span>
-            <span>{STORED_STATE.baseName} primes larger than 10 can only end on {displayOrArray(
+            <span><strong>Primes</strong> - Divisible only by 1 and themselves.</span>
+            <span><br>All integers have a unqiue prime factorization, for 10 in {STORED_STATE.baseName} its <strong>{primeFactors(base).map(x => x.toString(base)).join(' * ')}</strong>.</span>
+            <span><br>In {STORED_STATE.baseName}, primes larger than 10 must end in {displayOrArray(
                 Array.from({ length: base }, (_, i) => i)
                     .filter(d => gcd(d, base) === 1)
-            )}. {base === 6 ? 'Beautiful!' : ''}</span>
+            )}.</span>
+            {#if base === 6}<span>This is because all primes other than 2 and 3 are made using: <strong>6n ± 1</strong>, which fits seximal perfectly.</span>{/if}
+
         {:else if mode == 'square' }
-            <span><strong>Square Numbers</strong> are the result of multiplying an integer by itself.</span>
-            <span>{STORED_STATE.baseName} square numbers can only end on {displayOrArray(
+            <span><strong>Squares</strong> - The results of integers multiplied by themselves (n²).</span>
+            <span><br>Quadratic Residue: In {STORED_STATE.baseName} squares must end in {displayOrArray(
                 [...new Set(
                     Array.from({ length: base }, (_, i) => i**2 % base)
                 )].sort((a, b) => a - b)
                 )}.</span>
+
         {:else if mode == 'harshard' }
-            <span><strong>Harshard Numbers</strong> are integers divisible by the sum of their digits.</span>
-            <br><span class="example">{((base - 1) * 2).toString(base)} is Harshad because it's divisible by {(base - 1).toString(base)} = (1 + {(base - 2).toString(base)}).</span>
+            <span><strong>Harshards</strong> - (Sanskrit for "joy-giver") - Integers divisible by the sum of their digits.</span>
+            <br><span class="example">{((base - 1) * 2).toString(base)} is Harshad because it's divisible by (1 + {(base - 2).toString(base)}) which is {(base - 1).toString(base)}.</span>
+        
         {:else if mode == 'happy' }
-            <span><strong>Happy Numbers</strong>  are integers that eventually reach 1 when replaced by the sum of the square of their digits repeatedly.</span>
+            <span><strong>Happy Numbers</strong> - Integers that escape the "sad loop". Summing the squares of their digits over and over again eventually hits <strong>1</strong>.</span>
             <br><span class="example">10 is Happy because 1² + 0² = 1.</span>
+            {#if base === 4 || base === 2}<span><br>All numbers are happy, yay!</span>{/if}
+        
         {:else if typeof mode === 'number'}
             {@const rules = divisibilityRulesAll(mode)}
             <div class="rules-container">
@@ -188,18 +198,19 @@
                         <div class="rule-item">
                             {#if rule.type == 'trailing'}
                                 <span class="bullet">></span>
-                                check if the last {rule.digits
-                                    ? `digit${rule.lastDigits === 1 ? ' is' : 's are'} ${rule.digits}`
-                                    : `${rule.lastDigits} digits are divisible by ${n.toString(base)}`
+                                The last {rule.digits
+                                    ? `digit${rule.lastDigits === 1 ? '' : 's'} must be ${rule.digits}`
+                                    : `${rule.lastDigits} digits must be divisible by ${n.toString(base)}`
                                 }.
                             {:else if rule.type == 'universal digit sum'}
                             <span class="bullet">Σ</span>
-                                {#if rule.multiplyBy === 1} sum the digits{rule.groupDigits === 1 ? '' : ` in groups of ${rule.groupDigits.toString(base)}`}.
+                                {#if rule.multiplyBy === 1}
+                                    Sum the digits{rule.groupDigits === 1 ? '' : ` in groups of ${rule.groupDigits.toString(base)}`}.
                                 {:else if rule.multiplyBy === -1}
-                                    subtract the last {rule.groupDigits === 1 ? 'digit' : `${rule.groupDigits.toString(base)} digits`} from the other digits.
+                                    Subtract the last {rule.groupDigits === 1 ? 'digit' : `${rule.groupDigits.toString(base)} digits`} from the other digits.
                                 {:else}
-                                    multiply the last {rule.groupDigits === 1 ? 'digit' : `${rule.groupDigits.toString(base)} digits`} by {Math.abs(rule.multiplyBy).toString(base)} and
-                                        {rule.multiplyBy < 0 ? 'subtract it from' : 'add it to'} the other digits.
+                                    Multiply the last {rule.groupDigits === 1 ? 'digit' : `${rule.groupDigits.toString(base)} digits`} by {Math.abs(rule.multiplyBy).toString(base)} and
+                                    {rule.multiplyBy < 0 ? 'subtract it from' : 'add it to'} the other digits.
                                 {/if}
                                 {#if rule.example}<br><span class="example">{rule.example}</span>{/if}
                             {/if}
