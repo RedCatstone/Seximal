@@ -7,4 +7,6 @@
 	<title>{STORED_STATE.baseName} Quick Maths</title>
 </svelte:head>
 
-<QuickMaths />
+<main>
+	<QuickMaths />
+</main>

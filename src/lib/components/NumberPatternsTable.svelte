@@ -1,10 +1,10 @@
 <script lang="ts">
 	import Checkbox from "$lib/components/reuseable/Checkbox.svelte";
 	import { STORED_STATE } from "$lib/globalState.svelte";
-	import { gcd, primePowerComponents, getTrailingAndCoprime, isHarshad, isPrime, modInverse, primeFactors, isHappyNumber } from "$lib/mathstuff.svelte";
+	import { gcd, primePowerComponents, getTrailingAndCoprime, isHarshad, isPrime, modInverse, primeFactors, isHappyNumber, displayOrArray, displayStrOrArray } from "$lib/mathstuff.svelte";
     const base = $derived(STORED_STATE.base);
 
-    let rows = $state(360);
+    let rows = $derived(base * 0 + 216);
     
     type HighlighterMode = null | 'prime' | 'square' | 'harshard' | 'happy' | number /* multiples of */;
     let mode: HighlighterMode = $state(null);
@@ -21,14 +21,6 @@
         if (!isNaN(parsed) && parsed) mode = parsed;
         else if (typeof mode === 'number') mode = null;
     });
-
-    function displayOrArray(arr: number[], or="or"): string {
-        return displayStrOrArray(arr.map(x => x.toString(base)), or)
-    }
-    function displayStrOrArray(arr: string[], or="or"): string {
-        if (arr.length === 1) return arr[0];
-        return `${arr.slice(0, -1).join(', ')} ${or} ${arr.at(-1)}`;
-    }
 
     type DivisibilityRule = { type: 'trailing', lastDigits: number, digits?: string }
         | { type: 'universal digit sum', multiplyBy: number, groupDigits: number, example?: string };
@@ -138,120 +130,112 @@
     }
 </script>
 
-<div class="container-container">
-    <h1>Number Patterns</h1>
-    <div class="above-pattern-table">
-        <div class="highlighter-toggles">
-            <div><Checkbox checked={mode === 'prime'} onchange={() => changeMode('prime')} label="Primes"/></div>
-            <div><Checkbox checked={mode === 'square'} onchange={() => changeMode('square')} label="Squares"/></div>
-            <div><Checkbox checked={mode === 'harshard'} onchange={() => changeMode('harshard')} label="Harshard"/></div>
-            <div><Checkbox checked={mode === 'happy'} onchange={() => changeMode('happy')} label="Happy"/></div>
-            <div class:active={typeof mode === 'number'}>
-                <label for="multiples-of">Multiples of</label>
-                <input type="number"
-                    id="multiples-of"
-                    style:width="30px"
-                    style:height="25px"
-                    style:margin-left="5px"
-                    bind:value={multiplesOfValue}
-                />
-            </div>
+<h1>Number Patterns</h1>
+<div class="above-pattern-table">
+    <div class="highlighter-toggles">
+        <div><Checkbox checked={mode === 'prime'} onchange={() => changeMode('prime')} label="Primes"/></div>
+        <div><Checkbox checked={mode === 'square'} onchange={() => changeMode('square')} label="Squares"/></div>
+        <div><Checkbox checked={mode === 'harshard'} onchange={() => changeMode('harshard')} label="Harshard"/></div>
+        <div><Checkbox checked={mode === 'happy'} onchange={() => changeMode('happy')} label="Happy"/></div>
+        <div class:active={typeof mode === 'number'}>
+            <label for="multiples-of">Multiples of</label>
+            <input type="number"
+                id="multiples-of"
+                style:width="30px"
+                style:height="25px"
+                style:margin-left="5px"
+                bind:value={multiplesOfValue}
+            />
         </div>
-        {#if mode == 'prime' }
-            <span><strong>Primes</strong> - Divisible only by 1 and themselves.</span>
-            <span><br>All integers have a unqiue prime factorization, for 10 in {STORED_STATE.baseName} its <strong>{primeFactors(base).map(x => x.toString(base)).join(' * ')}</strong>.</span>
-            <span><br>In {STORED_STATE.baseName}, primes larger than 10 must end in {displayOrArray(
-                Array.from({ length: base }, (_, i) => i)
-                    .filter(d => gcd(d, base) === 1)
+    </div>
+    {#if mode == 'prime' }
+        <span><strong>Primes</strong> - Divisible only by 1 and themselves.</span>
+        <span><br>All integers have a unqiue prime factorization, for 10 in {STORED_STATE.baseName} its <strong>{primeFactors(base).map(x => x.toString(base)).join(' * ')}</strong>.</span>
+        <span><br>{STORED_STATE.baseName}, primes larger than 10 must end in {displayOrArray(
+            Array.from({ length: base }, (_, i) => i)
+                .filter(d => gcd(d, base) === 1)
+        )}.</span>
+        {#if base === 6}<span>(All primes other than 2 and 3 can be made using: <strong>6n ± 1</strong>, which fits seximal perfectly.)</span>{/if}
+
+    {:else if mode == 'square' }
+        <span><strong>Squares</strong> - The results of integers multiplied by themselves (n²).</span>
+        <span><br>{STORED_STATE.baseName} squares must end in {displayOrArray(
+            [...new Set(
+                Array.from({ length: base }, (_, i) => i**2 % base)
+            )].sort((a, b) => a - b)
             )}.</span>
-            {#if base === 6}<span>This is because all primes other than 2 and 3 are made using: <strong>6n ± 1</strong>, which fits seximal perfectly.</span>{/if}
 
-        {:else if mode == 'square' }
-            <span><strong>Squares</strong> - The results of integers multiplied by themselves (n²).</span>
-            <span><br>Quadratic Residue: In {STORED_STATE.baseName} squares must end in {displayOrArray(
-                [...new Set(
-                    Array.from({ length: base }, (_, i) => i**2 % base)
-                )].sort((a, b) => a - b)
-                )}.</span>
-
-        {:else if mode == 'harshard' }
-            <span><strong>Harshards</strong> - (Sanskrit for "joy-giver") - Integers divisible by the sum of their digits.</span>
-            <br><span class="example">{((base - 1) * 2).toString(base)} is Harshad because it's divisible by (1 + {(base - 2).toString(base)}) which is {(base - 1).toString(base)}.</span>
-        
-        {:else if mode == 'happy' }
-            <span><strong>Happy Numbers</strong> - Integers that escape the "sad loop". Summing the squares of their digits over and over again eventually hits <strong>1</strong>.</span>
-            <br><span class="example">10 is Happy because 1² + 0² = 1.</span>
-            {#if base === 4 || base === 2}<span><br>All numbers are happy, yay!</span>{/if}
-        
-        {:else if typeof mode === 'number'}
-            {@const rules = divisibilityRulesAll(mode)}
-            <div class="rules-container">
-                {#if primePowerComponents(mode).length !== getTrailingAndCoprime(mode).length}
-                    <Checkbox bind:checked={DIV_RULES_COMBINE} label={'Combine Rules'}/>
-                {/if}
-                {#if rules.length > 1}
-                    <span class="rule-target">A number is divisible by {mode.toString(base)} if it is divisible by {displayOrArray(rules.map(([x, _]) => x), "and")}:</span>
-                {/if}
-                {#each rules as [n, rulesForN]}
-                    <span class="rule-target">Rule{rulesForN.length === 1 ? '' : 's'} for {n.toString(base)}:</span>
-                    {#each rulesForN as rule}
-                        <div class="rule-item">
-                            {#if rule.type == 'trailing'}
-                                <span class="bullet">></span>
-                                The last {rule.digits
-                                    ? `digit${rule.lastDigits === 1 ? '' : 's'} must be ${rule.digits}`
-                                    : `${rule.lastDigits} digits must be divisible by ${n.toString(base)}`
-                                }.
-                            {:else if rule.type == 'universal digit sum'}
-                            <span class="bullet">Σ</span>
-                                {#if rule.multiplyBy === 1}
-                                    Sum the digits{rule.groupDigits === 1 ? '' : ` in groups of ${rule.groupDigits.toString(base)}`}.
-                                {:else if rule.multiplyBy === -1}
-                                    Subtract the last {rule.groupDigits === 1 ? 'digit' : `${rule.groupDigits.toString(base)} digits`} from the other digits.
-                                {:else}
-                                    Multiply the last {rule.groupDigits === 1 ? 'digit' : `${rule.groupDigits.toString(base)} digits`} by {Math.abs(rule.multiplyBy).toString(base)} and
-                                    {rule.multiplyBy < 0 ? 'subtract it from' : 'add it to'} the other digits.
-                                {/if}
-                                {#if rule.example}<br><span class="example">{rule.example}</span>{/if}
+    {:else if mode == 'harshard' }
+        <span><strong>Harshards</strong> - (Sanskrit for "joy-giver") - Integers divisible by the sum of their digits.</span>
+        <br><span class="example">{((base - 1) * 2).toString(base)} is Harshad because it's divisible by (1 + {(base - 2).toString(base)}) which is {(base - 1).toString(base)}.</span>
+    
+    {:else if mode == 'happy' }
+        <span><strong>Happy Numbers</strong> - Integers that escape the "sad loop". Summing the squares of their digits over and over again eventually hits <strong>1</strong>.</span>
+        <br><span class="example">10 is Happy because 1² + 0² = 1.</span>
+        {#if base === 4 || base === 2}<span><br>All numbers are happy, yay!</span>{/if}
+    
+    {:else if typeof mode === 'number'}
+        {@const rules = divisibilityRulesAll(mode)}
+        <div class="rules-container">
+            {#if primePowerComponents(mode).length !== getTrailingAndCoprime(mode).length}
+                <Checkbox bind:checked={DIV_RULES_COMBINE} label={'Combine Rules'}/>
+            {/if}
+            {#if rules.length > 1}
+                <span class="rule-target">A number is divisible by {mode.toString(base)} if it is divisible by {displayOrArray(rules.map(([x, _]) => x), "and")}:</span>
+            {/if}
+            {#each rules as [n, rulesForN]}
+                <span class="rule-target">Rule{rulesForN.length === 1 ? '' : 's'} for {n.toString(base)}:</span>
+                {#each rulesForN as rule}
+                    <div class="rule-item">
+                        {#if rule.type == 'trailing'}
+                            <span class="bullet">></span>
+                            The last {rule.digits
+                                ? `digit${rule.lastDigits === 1 ? '' : 's'} must be ${rule.digits}`
+                                : `${rule.lastDigits} digits must be divisible by ${n.toString(base)}`
+                            }.
+                        {:else if rule.type == 'universal digit sum'}
+                        <span class="bullet">Σ</span>
+                            {#if rule.multiplyBy === 1}
+                                Sum the digits{rule.groupDigits === 1 ? '' : ` in groups of ${rule.groupDigits.toString(base)}`}.
+                            {:else if rule.multiplyBy === -1}
+                                Subtract the last {rule.groupDigits === 1 ? 'digit' : `${rule.groupDigits.toString(base)} digits`} from the other digits.
+                            {:else}
+                                Multiply the last {rule.groupDigits === 1 ? 'digit' : `${rule.groupDigits.toString(base)} digits`} by {Math.abs(rule.multiplyBy).toString(base)} and
+                                {rule.multiplyBy < 0 ? 'subtract it from' : 'add it to'} the other digits.
                             {/if}
-                        </div>
+                            {#if rule.example}<br><span class="example">{rule.example}</span>{/if}
+                        {/if}
+                    </div>
+                {/each}
+            {/each}
+        </div>
+    {/if}
+</div>
+<div class="table-container">
+    <table>
+        <tbody>
+            {#each { length: rows } as _, row}
+                <tr>
+                    {#each { length: base } as _, col}
+                        {@const val = row * base + col + 1}
+                        <td class:highlighted={
+                            mode === 'prime' && isPrime(val)
+                            || mode === 'square' && Number.isInteger(Math.sqrt(val))
+                            || mode === 'harshard' && isHarshad(val)
+                            || mode == 'happy' && isHappyNumber(val)
+                            || typeof mode == 'number' && val % mode === 0
+                        }>
+                            {val.toString(base)}
+                        </td>
                     {/each}
-                {/each}
-            </div>
-        {/if}
-    </div>
-    <div class="table-container">
-        <table>
-            <tbody>
-                {#each { length: rows } as _, row}
-                    <tr>
-                        {#each { length: base } as _, col}
-                            {@const val = row * base + col + 1}
-                            <td class:highlighted={
-                                mode === 'prime' && isPrime(val)
-                                || mode === 'square' && Number.isInteger(Math.sqrt(val))
-                                || mode === 'harshard' && isHarshad(val)
-                                || typeof mode == 'number' && val % mode === 0
-                                || mode == 'happy' && isHappyNumber(val)
-                            }>
-                                {val.toString(base)}
-                            </td>
-                        {/each}
-                    </tr>
-                {/each}
-            </tbody>
-        </table>
-        <button onclick={() => rows += 360} style:font-size="1.3rem">Bigger Table</button>
-    </div>
+                </tr>
+            {/each}
+        </tbody>
+    </table>
+    <button onclick={() => rows += 216} style:font-size="1.3rem">Bigger Table</button>
 </div>
 
 <style>
-    .container-container {
-        display: flex;
-        align-items: center;
-        flex-direction: column;
-    }
-
     .above-pattern-table {
         padding: 8px 16px;
         background: var(--color-bg-1);

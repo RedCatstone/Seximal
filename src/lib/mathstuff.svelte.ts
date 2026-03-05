@@ -1,7 +1,7 @@
-import { STORED_STATE } from "$lib/globalState.svelte";
+import { pronounce, STORED_STATE } from "$lib/globalState.svelte";
 const base = $derived(STORED_STATE.base);
 
-export type PrefixOperator = '%' | '√' | '!' | 'log' | '1/' | 'Sum ' | 'Prim ';
+export type PrefixOperator = '%' | '√' | '!' | 'log' | '1/' | 'Sum ' | 'Prim ' | 'Say ';
 export type InfixOperator = '+' | '-' | '*' | '÷' | '^' | 'mod' | 'log_';
 
 export type InfixOrPrefixCalc = [number, InfixOperator, number] | [PrefixOperator, number];
@@ -16,7 +16,7 @@ export const infixOpNames = {
     'log_': 'Logarithmic',
 }
 
-export function doPrefixCalc(op: PrefixOperator, n: number): number | number[] {
+export function doPrefixCalc(op: PrefixOperator, n: number): number | number[] | string {
     if (op == '%') return n / base**2;
     else if (op == '√') return Math.sqrt(n);
     else if (op == '!') return gamma(n + 1);
@@ -24,6 +24,7 @@ export function doPrefixCalc(op: PrefixOperator, n: number): number | number[] {
     else if (op == '1/') return 1 / n;
     else if (op == 'Sum ') return n.toString(base).split('').reduce((tot, x) => tot + parseInt(x, base), 0);
     else if (op == 'Prim ') return primeFactors(n);
+    else if (op == 'Say ') return pronounce(n);
     throw new Error("woops.")
 }
 
@@ -69,12 +70,16 @@ export function displayKeypadNum(keypadNum: number, keypadDecimal: number | null
 export function displayCalc(calc: InfixOrPrefixCalc): string {
     return calc.length === 3 ? displayInfix(...calc, null) : displayPrefix(...calc)
 }
-export function doCalc(calc: InfixOrPrefixCalc): number | number[] {
+export function doCalc(calc: InfixOrPrefixCalc): number | number[] | string {
     return calc.length === 3 ? doInfixCalc(...calc) : doPrefixCalc(...calc)
 }
 
-export function displayInfix(left: number|number[]|null, op: string|null, right: number|null, decimalDigit: number|null): string {
-    const strLeft = Array.isArray(left) ? `[${left.map(x => displayNumber(x))}]` : displayNumber(left);
+export function displayInfix(left: number|number[]|string|null, op: string|null, right: number|null, decimalDigit: number|null): string {
+    const strLeft = Array.isArray(left)
+        ? `[${left.map(x => displayNumber(x))}]`
+        : typeof left === 'number' || left == null
+            ? displayNumber(left)
+            : left;
     let strRight = displayNumber(right);
     if (decimalDigit && !strRight.includes('.')) {
         strRight += '.' + '0'.repeat(decimalDigit - 1)
@@ -123,7 +128,6 @@ export function gcd(a: number, b: number): number {
 }
 
 export function modInverse(a: number, mod: number): number | null {
-    if (isNaN(a) || isNaN(mod)) return null;
     // standardize a to be within [0, mod)
     a = ((a % mod) + mod) % mod;
 
@@ -141,7 +145,7 @@ export function modInverse(a: number, mod: number): number | null {
     let x = 0, lastX = 1;
     let y = 1, lastY = 0;
 
-    while (b !== 0) {
+    while (b) {
         let quotient = Math.floor(a / b);
         
         [a, b] = [b, a % b];  // Update a and b (Standard Euclidean)
@@ -215,19 +219,6 @@ export function isHarshad(n: number) {
     return n % digitSum === 0;
 }
 
-
-export function floorWithPrecision(num: number, precision: number): number {
-    const factor = base ** precision;
-    return Math.floor(num * factor) / factor;
-}
-export function ceilWithPrecision(num: number, precision: number): number {
-    const factor = base ** precision;
-    return Math.ceil(num * factor) / factor;
-}
-
-
-
-
 export function isHappyNumber(n: number): boolean {
     if (n <= 0) return false;
     // same number twice => unhappy loop
@@ -241,4 +232,23 @@ export function isHappyNumber(n: number): boolean {
     }
     // if it exited because current is 1, happy!
     return current === 1;
+}
+
+
+export function floorWithPrecision(num: number, precision: number): number {
+    const factor = base ** precision;
+    return Math.floor(num * factor) / factor;
+}
+export function ceilWithPrecision(num: number, precision: number): number {
+    const factor = base ** precision;
+    return Math.ceil(num * factor) / factor;
+}
+
+
+export function displayOrArray(arr: number[], or="or"): string {
+    return displayStrOrArray(arr.map(x => x.toString(base)), or)
+}
+export function displayStrOrArray(arr: string[], or="or"): string {
+    if (arr.length === 1) return arr[0];
+    return `${arr.slice(0, -1).join(', ')} ${or} ${arr.at(-1)}`;
 }

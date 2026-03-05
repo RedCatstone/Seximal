@@ -23,7 +23,7 @@
     }
 </script>
 
-<nav class="container-container">
+<header class="container-container">
     <div class="container">
         <div class="base-and-input">
             <span>BASE:</span>
@@ -48,12 +48,15 @@
             {/each}
         </div>
     </div>
-</nav>
+</header>
 
 <style>
     .container-container {
         display: flex;
         justify-content: center;
+        position: sticky;
+        top: 0;
+        z-index: 10;
     }
 
     .container {
@@ -63,6 +66,7 @@
         margin-bottom: 2px;
         padding: 8px 16px;
         border: 2px solid var(--color-bg-1);
+        background: var(--color-bg-0);
     }
 
     .preset-bases {

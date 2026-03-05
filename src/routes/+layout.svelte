@@ -14,8 +14,8 @@
 	<title>Base {STORED_STATE.baseName}</title>
 
 	<!-- SEO yay -->
-	<meta name="description" content={"Explore the beauty of different number-bases: (Seximal, Dozenal, Binary, Ternary, Quaternary, ...). \
-Includes a Scientific Calculator, Quick Maths, Number-pattern Grid and Counting! Seximal (Base 6) is objectively the best/most natural number system."} />
+	<meta name="description" content={"Explore the beauty of different number-bases: (Seximal, Dozenal, Hex, Binary, Ternary, Quaternary, ...). \
+Includes a Scientific Calculator, Quick Maths, Counting and other cool patterns! Seximal (Base 6) is objectively the best/most natural number system."} />
     <meta property="og:title" content="Seximal - Numberbase Stuff" />
     <meta property="og:description" content="Seximal (Base 6) is objectively the best/most natural number system." />
 	<meta name="theme-color" content="#f1ad46" />
@@ -23,7 +23,6 @@ Includes a Scientific Calculator, Quick Maths, Number-pattern Grid and Counting!
 
 
 <SwitchBase />
-
 <NavBar />
 
 {@render children()}

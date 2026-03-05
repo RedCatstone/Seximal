@@ -2,9 +2,10 @@
 	--color-bg-0: #202020;
 	--color-bg-1: #303030;
 	--color-bg-2: #555;
-	--color-text: #e0e0e0;
+	--color-text: #fdfdfd;
 	--color-text-dim: #777;
 	--color-text-kinda-dim: #999;
+	--color-text-very-dim: #333333;
 	--color-theme-1: #f74242;
 	--color-theme-2: #f1ad46;
 	--color-theme-3: #7adf7f;
@@ -13,15 +14,26 @@
     background: var(--color-bg-0);
     color: var(--color-text);
 	scrollbar-width: thin;
+	scrollbar-color: var(--color-bg-2) transparent;
 }
 
 
 
-h1 {
-	font-size: 1.7rem;
+h1, h2, h3 {
 	color: var(--color-theme-2);
-	margin: 5px 0;
-	letter-spacing: 2px;
+	margin: 0;
+}
+
+nav, main {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 10px;
+}
+
+main > * {
+	max-width: 600px;
 }
 
 
@@ -121,12 +133,6 @@ button {
 	scrollbar-width: thin;
 	background: black;
 	border: 1px solid var(--color-bg-1);
-
-
-	& span {
-		font-size: 1.8rem;
-		font-weight: 600;
-	}
 	
 	& table {
 		user-select: none;
@@ -166,6 +172,9 @@ button {
 				background: rgb(from var(--color-theme-3) R G B / 0.3);
 				font-weight: bold;
 			}
+			&.dim {
+				color: var(--color-text-very-dim);
+			}
 		}
 
 		& td:hover {
@@ -189,5 +198,21 @@ button {
 				height: 100%;
 			}
 		}
+	}
+}
+
+
+
+
+
+.module {
+	width: 100%;
+	padding: 20px;
+	background: rgba(0, 0, 0, 0.2);
+	border: 1px solid var(--color-bg-1);
+
+	& p {
+		font-size: 1rem;
+		margin: 5px 0 15px 0;
 	}
 }

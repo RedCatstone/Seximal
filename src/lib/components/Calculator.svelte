@@ -8,12 +8,12 @@
     // ------------------------------
     //      Calculator State
     // ------------------------------
-    let inputLeft = $state<number | number[] | null>(null);
-    let currInfixOp = $state<InfixOperator | null>(null);
-    let inputRight = $state<number | null>(0);     // the number you are currently inputting
-    let decimalDigit = $state<number | null>(null);    // which decimal digit you are currently typing in
+    let inputLeft: number | number[] | string | null = $state(null);
+    let currInfixOp: InfixOperator | null = $state(null);
+    let inputRight: number | null = $state(0);     // the number you are currently inputting
+    let decimalDigit: number | null = $state(null);    // which decimal digit you are currently typing in
 
-    let pastCalc = $state<InfixOrPrefixCalc | null>(null);
+    let pastCalc: InfixOrPrefixCalc | null = $state(null);
 
 
     const displayedCalc = $derived(displayInfix(inputLeft, currInfixOp, inputRight, decimalDigit));
@@ -58,7 +58,7 @@
     }
 
     function pressPrefixOp(op: PrefixOperator) {
-        if (Array.isArray(inputLeft)) return;
+        if (inputLeft !== null && typeof inputLeft !== 'number') return;
         if (inputLeft != null && inputRight == null && currInfixOp == null) {
             inputRight = inputLeft;
             inputLeft = null;
@@ -70,7 +70,7 @@
 
         pastCalc = [op, inputRight];
 
-        if (inputLeft != null && currInfixOp != null && !Array.isArray(result)) inputRight = result;
+        if (inputLeft != null && currInfixOp != null && typeof result === 'number') inputRight = result;
         else {
             inputLeft = result;
             currInfixOp = null;
@@ -87,7 +87,7 @@
                 pressPrefixOp(pastCalc[0]);
             }
         }
-        if (inputLeft == null || Array.isArray(inputLeft) || inputRight == null || currInfixOp == null) return;
+        if (inputLeft == null || typeof inputLeft !== 'number' || inputRight == null || currInfixOp == null) return;
 
         const result = doInfixCalc(inputLeft, currInfixOp, inputRight);
 
@@ -121,58 +121,49 @@
 </script>
 
 <svelte:window onkeydown={handleKeyDown} />
-<main class="container-container" role="application" aria-label="Seximal Calculator">
-    <div class="container">
-        <header>
-            <span class="brand">{STORED_STATE.baseName.toUpperCase()} IT-{(69).toString(base)}D</span>
-        </header>
-        <div class="output-area">
-            <div class="past-calc">{displayedPastCalc}</div>
-            <div class="curr-calc">{displayedCalc}</div>
-        </div>
-        <div class="calc-buttons" style:--columns="5" style:margin-bottom="25px">
-            <button class="util" onclick={() => pressPrefixOp("√")}>√</button>
-            <button class="util" onclick={() => pressInfixOp("^")}>xⁿ</button>
-            <button class="util" onclick={() => pressPrefixOp("!")}>x!</button>
-            <button class="util" onclick={() => pressInfixOp("mod")}>mod</button>
-            <button class="util" onclick={() => pressInfixOp("log_")}>logₐ</button>
-            <button class="util" onclick={() => pressPrefixOp("1/")}>¹⁄ₓ</button>
-            <button class="util" onclick={() => pressPrefixOp("%")}>%</button>
-            <button class="util" onclick={() => pressPrefixOp("Sum ")}>Sum</button>
-            <button class="util" onclick={() => pressPrefixOp("Prim ")}>Prim</button>
-            <button class="util" onclick={() => pressPrefixOp("log")}>log</button>
-            <button class="const" onclick={() => loadConstant(Math.E)}>e</button>
-            <button class="const" onclick={() => loadConstant(Math.PI)}>π</button>
-            <button class="const" onclick={() => loadConstant((1 + Math.sqrt(5)) / 2)}>ϕ</button>
-        </div>
-        <div style:display="flex" style:justify-content="center" style:gap="25px">
-            <NumKeypad columns={3} bind:inputNum={inputRight} bind:decimalDigit={decimalDigit} {clearInput} onDeNull={() => { if (currInfixOp == null) clearInput() }}/>
-            <div class="calc-buttons" style:--columns="2">
-                <button class="util" onclick={() => pressInfixOp("*")}>*</button>
-                <button class="util" onclick={() => pressInfixOp("÷")}>÷</button>
-                <button class="util" onclick={() => pressInfixOp("+")}>+</button>
-                <button class="util" onclick={() => pressInfixOp("-")}>-</button>
-                <button class="ac" onclick={clearInput}>AC</button>
-                <button class="equals" onclick={pressEquals}>=</button>
-            </div>
+<div class="container">
+    <header>
+        <span class="brand">{STORED_STATE.baseName.toUpperCase()} IT-{(69).toString(base)}D</span>
+    </header>
+    <div class="output-area">
+        <div class="past-calc">{displayedPastCalc}</div>
+        <div class="curr-calc">{displayedCalc}</div>
+    </div>
+    <div class="calc-buttons" style:--columns="5" style:margin-bottom="25px">
+        <button class="util" onclick={() => pressPrefixOp("√")}>√</button>
+        <button class="util" onclick={() => pressInfixOp("^")}>xⁿ</button>
+        <button class="util" onclick={() => pressPrefixOp("!")}>x!</button>
+        <button class="util" onclick={() => pressInfixOp("mod")}>mod</button>
+        <button class="util" onclick={() => pressInfixOp("log_")}>logₐ</button>
+        <button class="util" onclick={() => pressPrefixOp("1/")}>¹⁄ₓ</button>
+        <button class="util" onclick={() => pressPrefixOp("%")}>%</button>
+        <button class="util" onclick={() => pressPrefixOp("Sum ")}>Sum</button>
+        <button class="util" onclick={() => pressPrefixOp("Prim ")}>Prim</button>
+        <button class="util" onclick={() => pressPrefixOp("log")}>log</button>
+        <button class="util" onclick={() => pressPrefixOp("Say ")}>Say</button>
+        <button class="const" onclick={() => loadConstant(Math.E)}>e</button>
+        <button class="const" onclick={() => loadConstant(Math.PI)}>π</button>
+        <button class="const" onclick={() => loadConstant((1 + Math.sqrt(5)) / 2)}>ϕ</button>
+    </div>
+    <div style:display="flex" style:justify-content="center" style:gap="25px">
+        <NumKeypad columns={3} bind:inputNum={inputRight} bind:decimalDigit={decimalDigit} {clearInput} onDeNull={() => { if (currInfixOp == null) clearInput() }}/>
+        <div class="calc-buttons" style:--columns="2">
+            <button class="util" onclick={() => pressInfixOp("*")}>*</button>
+            <button class="util" onclick={() => pressInfixOp("÷")}>÷</button>
+            <button class="util" onclick={() => pressInfixOp("+")}>+</button>
+            <button class="util" onclick={() => pressInfixOp("-")}>-</button>
+            <button class="ac" onclick={clearInput}>AC</button>
+            <button class="equals" onclick={pressEquals}>=</button>
         </div>
     </div>
-</main>
+</div>
 
 <style>
-    .container-container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-family: MATH;
-    }
-
     .container {
-        flex-direction: column;
-        padding: 24px;
+        padding: 15px;
         border: 2px solid var(--color-bg-1);
-        border-radius: 32px;
-        width: 400px;
+        border-radius: 20px;
+        font-family: MATH;
     }
 
     .brand {
@@ -191,8 +182,7 @@
         border-radius: 8px;
 
         text-align: right;
-        overflow: hidden;
-        white-space: nowrap;
+        white-space: wrap;
 
         min-height: 50px;
         display: flex;

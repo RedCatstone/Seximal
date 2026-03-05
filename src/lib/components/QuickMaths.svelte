@@ -18,67 +18,57 @@
     const TIMER_SUCCESS = 2_000;
     const TIMER_FAIL = -500;
     
-    let scrollAnchor = $state<HTMLElement | null>(null);
+    let scrollAnchor: HTMLElement | null = $state(null);
 
 
     function generateQuestion(): InfixOrPrefixCalc {
         const ops: InfixOperator[] = ['+', '-', '*', '÷'];
-        const op = ops[Math.floor(Math.random() * ops.length)];
-
-        let upTo = (op == '*') ? 2 + pastQuestions.length / 2
-            : (op == '÷') ? 2 + pastQuestions.length / 3
-            : 2 + pastQuestions.length;
-
-        const num1 = Math.floor(Math.random() * upTo) || base;
-        const num2 = Math.floor(Math.random() * upTo) || base;
-
-
-        const q: [number, InfixOperator, number] = [num1, op, num2];
-
-        // if it 2 decimals or less
-        const answer = doCalc(q);
         const decimalDigitsAllowed = pastQuestions.length > 10 ? 1 : 0;
-        if (!Array.isArray(answer) && !Number.isInteger(base**decimalDigitsAllowed * answer)) return generateQuestion();
-        return q;
+
+        while (true) {
+            const op = ops[Math.floor(Math.random() * ops.length)];
+            const upTo = (op == '*') ? 2 + pastQuestions.length / 2
+                       : (op == '÷') ? 2 + pastQuestions.length / 3
+                                     : 2 + pastQuestions.length;
+
+            const num1 = Math.floor(Math.random() * upTo) || base;  // 0 gets turned into 10 because 10 is fun ;p
+            const num2 = Math.floor(Math.random() * upTo) || base;
+
+            const answer = doCalc([num1, op, num2]);
+            if (typeof answer === 'number' && Number.isInteger(base**decimalDigitsAllowed * answer)) {
+                return [num1, op, num2];
+            }
+        }
     }
 
     function submitAnswer() {
         if (gameOver) return;
         const answer = doCalc(currQuestion);
-        if (Array.isArray(answer)) throw new Error("huh?");
+        if (typeof answer !== 'number') throw new Error("huh?");
 
         if (keypadInputNum != null && Math.abs(keypadInputNum - answer) < 0.0001) {
             // correct!!
-            if (timeLeftMs == null) {
-                // start the timer
-                timeLeftMs = TIMER_MAX_TIME;
-                currGameBase = base;
-            } else {
-                timeLeftMs += TIMER_SUCCESS;
-            }
-
             pastQuestions.push({question: currQuestion, answer });
+            scrollAnchor!.scrollIntoView({ behavior: 'instant', block: 'start' });
             currQuestion = generateQuestion();
             clearInput();
+
+            if (timeLeftMs != null) {
+                timeLeftMs += TIMER_SUCCESS;
+            }
+            else startTimer();
         }
         else if (timeLeftMs != null) {
             timeLeftMs += TIMER_FAIL;
         }
     }
 
-    // scroll effect
-    $effect(() => {
-        // "read" the length to create a dependency
-        pastQuestions.length;
-        scrollAnchor!.scrollIntoView({ behavior: 'instant', block: 'start' });
-    });
+    function startTimer() {
+        timeLeftMs = TIMER_MAX_TIME;
+        currGameBase = base;
 
-    // timer effect
-    $effect(() => {
-        // "read" the timeLeftMs to create a dependency
-        timeLeftMs;
         let previousFrameTimestamp = performance.now();
-        let frame = requestAnimationFrame(function tick(timestamp: DOMHighResTimeStamp) {
+        requestAnimationFrame(function tick(timestamp: DOMHighResTimeStamp) {
             if (timeLeftMs != null) {
                 const delta = timestamp - previousFrameTimestamp;
                 previousFrameTimestamp = timestamp;
@@ -87,12 +77,11 @@
                     makeGameOver();
                 } else {
                     timeLeftMs = newTimeLeft;
-                    frame = requestAnimationFrame(tick);
+                    requestAnimationFrame(tick);
                 }
             }
         });
-        return () => cancelAnimationFrame(frame);
-    });
+    }
 
     // game-over on base switch
     $effect(() => {
@@ -107,7 +96,7 @@
         timeLeftMs = 0;
         keypadDecimal = null;
         const answer = doCalc(currQuestion);
-        if (!Array.isArray(answer)) {
+        if (typeof answer === 'number') {
             keypadInputNum = answer;
         }
         if (pastQuestions.length > (STORED_STATE.quickMathsHighscores[currGameBase!] ?? 0)) {
@@ -149,7 +138,7 @@
 </script>
 
 <svelte:window onkeydown={handleKeyDown} />
-<main class="container-container" class:game-over={gameOver} style:--questions={pastQuestions.length}>
+<div class="container" class:game-over={gameOver} style:--questions={pastQuestions.length}>
     <div class="questions" bind:this={scrollAnchor}>
         {#each pastQuestions as question, i }
             <span data-number={(i+1).toString(base)} style:--i={i}>{`${displayCalc(question.question)} = ${displayNumber(question.answer)}`}</span>
@@ -169,10 +158,9 @@
     {#if gameOver }
         <div class="game-over-msg">
             You got
-                <span class="questions-correct">{pastQuestions.length.toString(base)}</span>
-                <span>{getBaseName(currGameBase!)}</span>
-                Question{pastQuestions.length == 1 ? '' : 's'} correct!
-            <br>(Best: {STORED_STATE.quickMathsHighscores[currGameBase!].toString(base)})
+            <span class="questions-correct">{pastQuestions.length.toString(base)}</span>
+            {getBaseName(currGameBase!)} Question{pastQuestions.length == 1 ? '' : 's'} correct!
+            (Best: {STORED_STATE.quickMathsHighscores[currGameBase!].toString(base)})
             <button class="util" onclick={retry}>Retry</button>
         </div>
     {/if}
@@ -184,10 +172,10 @@
             <button class="digit" onclick={pressMinus}>-</button>
         </div>
     </div>
-</main>
+</div>
 
 <style>
-    .container-container {
+    .container {
         display: flex;
         flex-direction: column;
         align-items: center;
