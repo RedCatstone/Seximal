@@ -22,12 +22,12 @@
 
 
     function generateQuestion(): InfixOrPrefixCalc {
-        const ops: InfixOperator[] = ['+', '-', '*', '÷'];
+        const ops: InfixOperator[] = ['+', '-', '×', '÷'];
         const decimalDigitsAllowed = pastQuestions.length > 10 ? 1 : 0;
 
         while (true) {
             const op = ops[Math.floor(Math.random() * ops.length)];
-            const upTo = (op == '*') ? 2 + pastQuestions.length / 2
+            const upTo = (op == '×') ? 2 + pastQuestions.length / 2
                        : (op == '÷') ? 2 + pastQuestions.length / 3
                                      : 2 + pastQuestions.length;
 
@@ -207,7 +207,7 @@
         & .input-num {
             display: inline-block;
             white-space: nowrap;
-            width: clamp(40px, 18vw, 100px);
+            width: clamp(40px, 20vw, 100px);
             padding: 0 5px;
 
             color: var(--color-theme-2);

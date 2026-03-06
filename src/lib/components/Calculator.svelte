@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { STORED_STATE } from "$lib/globalState.svelte";
 	import { displayCalc, displayInfix, doInfixCalc, doPrefixCalc, type InfixOperator, type InfixOrPrefixCalc, type PrefixOperator } from "$lib/mathstuff.svelte";
+	import { untrack } from "svelte";
 	import NumKeypad from "./reuseable/NumKeypad.svelte";
     const base = $derived(STORED_STATE.base);
 
@@ -70,6 +71,7 @@
 
         pastCalc = [op, inputRight];
 
+        
         if (inputLeft != null && currInfixOp != null && typeof result === 'number') inputRight = result;
         else {
             inputLeft = result;
@@ -77,6 +79,19 @@
             inputRight = null;
         }
     }
+
+    $effect(() => {
+        base;
+        // recalculate prefix operations on base switch, the result
+        // can change on base dependendent ops like: Sum, Prim, log, %, Say
+        untrack(() => {
+            if (pastCalc != null && pastCalc.length === 2) {
+                inputRight = pastCalc[1];
+                if (currInfixOp == null) inputLeft = null;
+                pressPrefixOp(pastCalc[0]);
+            }
+        })
+    })
 
     function pressEquals() {
         if (inputLeft != null && inputRight == null && pastCalc != null) {
@@ -111,7 +126,8 @@
         const target = e.target as HTMLElement;
         if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.contentEditable === 'true') return;
         const k = e.key;
-        if (k == '+' || k == '-' || k == '*' || k == '^') pressInfixOp(k);
+        if (k == '+' || k == '-' || k == '^') pressInfixOp(k);
+        else if (k == '*') pressInfixOp('×');
         else if (k == '/') pressInfixOp('÷');
         else if (k == '!') pressPrefixOp('!');
         else if (k == 'Enter' || k == '=') pressEquals();
@@ -134,21 +150,23 @@
         <button class="util" onclick={() => pressInfixOp("^")}>xⁿ</button>
         <button class="util" onclick={() => pressPrefixOp("!")}>x!</button>
         <button class="util" onclick={() => pressInfixOp("mod")}>mod</button>
-        <button class="util" onclick={() => pressInfixOp("log_")}>logₐ</button>
+        <button class="util" onclick={() => pressInfixOp("log_")}>logₓ</button>
         <button class="util" onclick={() => pressPrefixOp("1/")}>¹⁄ₓ</button>
-        <button class="util" onclick={() => pressPrefixOp("%")}>%</button>
-        <button class="util" onclick={() => pressPrefixOp("Sum ")}>Sum</button>
         <button class="util" onclick={() => pressPrefixOp("Prim ")}>Prim</button>
-        <button class="util" onclick={() => pressPrefixOp("log")}>log</button>
-        <button class="util" onclick={() => pressPrefixOp("Say ")}>Say</button>
         <button class="const" onclick={() => loadConstant(Math.E)}>e</button>
         <button class="const" onclick={() => loadConstant(Math.PI)}>π</button>
         <button class="const" onclick={() => loadConstant((1 + Math.sqrt(5)) / 2)}>ϕ</button>
     </div>
+    <div class="calc-buttons" style:--columns="5" style:margin-bottom="25px">
+        <button class="util" onclick={() => pressPrefixOp("%")}>%</button>
+        <button class="util" onclick={() => pressPrefixOp("log")}>log</button>
+        <button class="util" onclick={() => pressPrefixOp("Sum ")}>Sum</button>
+        <button class="util" onclick={() => pressPrefixOp("Say ")}>Say</button>
+    </div>
     <div style:display="flex" style:justify-content="center" style:gap="25px">
         <NumKeypad columns={3} bind:inputNum={inputRight} bind:decimalDigit={decimalDigit} {clearInput} onDeNull={() => { if (currInfixOp == null) clearInput() }}/>
         <div class="calc-buttons" style:--columns="2">
-            <button class="util" onclick={() => pressInfixOp("*")}>*</button>
+            <button class="util" onclick={() => pressInfixOp("×")}>×</button>
             <button class="util" onclick={() => pressInfixOp("÷")}>÷</button>
             <button class="util" onclick={() => pressInfixOp("+")}>+</button>
             <button class="util" onclick={() => pressInfixOp("-")}>-</button>
@@ -185,14 +203,16 @@
         white-space: wrap;
 
         min-height: 50px;
+        width: clamp(200px, 80vw, 350px);
         display: flex;
         flex-direction: column;
         justify-content: end;
+        overflow: hidden;
         
         & .curr-calc {
             display: flex;
             justify-content: flex-end;
-            font-size: 1.6rem;
+            font-size: clamp(1.2rem, 5vw, 1.6rem);
         }
         & .past-calc {
             display: flex;

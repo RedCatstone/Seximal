@@ -9,8 +9,8 @@ const base = $derived(STORED_STATE.base);
 
 if (browser) $effect.root(() => {
     $effect(() => {
-        localStorage.setItem('quickMathsHighscores', JSON.stringify(STORED_STATE.quickMathsHighscores))
-        localStorage.setItem('base', JSON.stringify(STORED_STATE.base))
+        localStorage.setItem('seximal_quickMathsHighscores', JSON.stringify(STORED_STATE.quickMathsHighscores))
+        localStorage.setItem('seximal_base', JSON.stringify(STORED_STATE.base))
     })
 })
 

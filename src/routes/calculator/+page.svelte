@@ -15,7 +15,7 @@
 
 <main>
 	<span>
-		This calculator lets you switch base mid calculation!
+		Do some calculations and see what happens when you switch the base at the top!
 		<br>In {STORED_STATE.baseName}, division by <strong>{displayOrArray(baseTerminatingNumbers)}</strong> always produces a terminating number.
 		{#if decBadNums.length}In Decimal, {displayOrArray(decBadNums)} would results in infinite cycles...{/if}
 	</span>

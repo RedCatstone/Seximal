@@ -32,10 +32,10 @@
                     <span class="operator">+</span>
                 {/if}
             {/each}
-            <!-- The Result -->
-            <div></div>
+        </div>
+        <!-- The Result -->
+        <div>
             <span class="operator">=</span>
-            <div></div>
             <span class="result">{value}</span>
         </div>
     </div>
@@ -57,6 +57,7 @@
         font-size: 1.2rem;
         padding: 15px;
         background: rgba(0,0,0,0.3);
+        max-width: 80vw;
         overflow-x: auto;
     }
 

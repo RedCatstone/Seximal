@@ -88,7 +88,7 @@
 <div class="container" role="slider" aria-valuenow={value} tabindex="0"
     {onpointerdown} {onpointermove}>
     
-    <div class="selector-outline"></div>
+    <!-- <div class="selector-outline"></div> -->
 
     <div class="ribbon" style:transform="translateX({(Math.round(offset) - offset) * ITEM_WIDTH - ITEM_WIDTH/2}px)">
         {#each visibleNumbers as n, i}
@@ -110,8 +110,8 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 100%;
         height: 50px;
+        position: relative;
 
         background: black;
         border: 1px solid var(--color-bg-1);
@@ -123,16 +123,36 @@
         &:active {
             cursor: grabbing;
         }
-    }
 
-    .selector-outline {
+        /* Fade effect on the sides */
+        &::before, &::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            width: 5%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+        }
+        &::before {
+            left: 0;
+            background: linear-gradient(to right, black, transparent);
+        }
+        &::after {
+            right: 0;
+            background: linear-gradient(to left, black, transparent);
+        }
+    }
+    
+
+    /* .selector-outline {
         position: absolute;
         width: 65px;
         height: 50px;
         border: 2px solid var(--color-theme-2);
         border-radius: 10px;
         z-index: 1;
-    }
+    } */
 
     .ribbon {
         height: 100%;

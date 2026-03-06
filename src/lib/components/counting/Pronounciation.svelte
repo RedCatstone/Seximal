@@ -12,7 +12,7 @@
     <h3>Pronounciation</h3>
     <p>
         To not confuse these numbers in other bases with decimal numbers, we would need a different way to say them.
-        Note that this pronounciation system is completely made up.
+        Note that this pronounciation system is made up by me. But it does work well!
     </p>
 
     <div class="grid" style:grid-template-columns="repeat({NUMBERS_ON_EACH_SIDE * 2 + 1}, 1fr)">

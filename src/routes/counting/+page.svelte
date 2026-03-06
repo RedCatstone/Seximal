@@ -17,6 +17,10 @@
 
 <main>
     <div class="sticky-boundary">
+		<div class="above-scroller">
+			<span class="scroll-me">Scroll me!</span>
+			<button onclick={() => value = 1}>Reset</button>
+		</div>
 		<div class="scroller">
 			<NumberScroller bind:value={value} />
 		</div>
@@ -30,6 +34,26 @@
 </main>
 
 <style>
+	.above-scroller {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		position: relative;
+		top: 15px;
+
+		& button {
+			position: absolute;
+			right: 0;
+			width: 90px;
+			font-size: 1rem;
+		}
+
+		& span {
+			text-align: center;
+			font-size: 1.4rem;
+		}
+	}
+
 	.sticky-boundary {
 		display: flex;
 		flex-direction: column;
@@ -38,7 +62,7 @@
 
 		& .scroller {
 			position: sticky;
-			top: 80px;
+			top: 95px;
 			width: 100%;
 			z-index: 1;
 		}

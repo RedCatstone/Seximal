@@ -2,14 +2,14 @@ import { pronounce, STORED_STATE } from "$lib/globalState.svelte";
 const base = $derived(STORED_STATE.base);
 
 export type PrefixOperator = '%' | '√' | '!' | 'log' | '1/' | 'Sum ' | 'Prim ' | 'Say ';
-export type InfixOperator = '+' | '-' | '*' | '÷' | '^' | 'mod' | 'log_';
+export type InfixOperator = '+' | '-' | '×' | '÷' | '^' | 'mod' | 'log_';
 
 export type InfixOrPrefixCalc = [number, InfixOperator, number] | [PrefixOperator, number];
 
 export const infixOpNames = {
     '+': 'Addition',
     '-': 'Subtraction',
-    '*': 'Multiplication',
+    '×': 'Multiplication',
     '÷': 'Division',
     '^': 'Exponentiation',
     'mod': 'Modular',
@@ -31,7 +31,7 @@ export function doPrefixCalc(op: PrefixOperator, n: number): number | number[] |
 export function doInfixCalc(left: number, op: InfixOperator, right: number): number {
     if (op == '+') return left + right;
     else if (op == '-') return left - right;
-    else if (op == '*') return left * right;
+    else if (op == '×') return left * right;
     else if (op == '÷') return left / right;
     else if (op == '^') return left ** right;
     else if (op == 'mod') return left % right;
