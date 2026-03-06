@@ -1,5 +1,6 @@
 <script lang="ts">
-	let { checked = $bindable(false), onchange, label = "" }: { checked: boolean, onchange?: () => void, label: string } = $props();
+	let { checked = $bindable(false), onchange, label = '' }:
+		{ checked: boolean; onchange?: () => void; label: string } = $props();
 </script>
 
 <label class="checkbox-wrapper">
@@ -22,10 +23,10 @@
 		--background: black;
 
 		&:hover .custom-box {
-			background: color-mix(in oklab, var(--background), white 25%)
+			background: color-mix(in oklab, var(--background), white 25%);
 		}
 		&:hover .label-text {
-			color: var(--color-text)
+			color: var(--color-text);
 		}
 	}
 

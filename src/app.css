@@ -11,13 +11,11 @@
 	--color-theme-3: #7adf7f;
 	--color-theme-4: #3cb9f3;
 
-    background: var(--color-bg-0);
-    color: var(--color-text);
+	background: var(--color-bg-0);
+	color: var(--color-text);
 	scrollbar-width: thin;
 	scrollbar-color: var(--color-bg-2) transparent;
 }
-
-
 
 h1, h2, h3 {
 	color: var(--color-theme-2);
@@ -36,11 +34,7 @@ main > * {
 	max-width: 600px;
 }
 
-
-
-
-
-input[type="number"] {
+input[type='number'], input[type='text'] {
 	height: 30px;
 	margin: 5px 0;
 	padding: 0 5px;
@@ -62,7 +56,6 @@ input[type="number"] {
 .active input {
 	border: 1px solid var(--color-theme-2);
 }
-
 
 button {
 	height: var(--button-size);
@@ -97,20 +90,11 @@ button {
 		opacity: 0.6;
 	}
 
-	&.digit {
-		--button-color: var(--color-text);
-		--button-bg-color: var(--color-text);
-	}
-	&.util { --button-color: var(--color-theme-2); font-size: 1.3rem }
+	&.digit { --button-color: var(--color-text); --button-bg-color: var(--color-text); }
+	&.util { --button-color: var(--color-theme-2); font-size: 1.3rem; }
 	&.const { --button-color: var(--color-theme-3); }
-	&.ac {
-		--button-bg-color: var(--color-theme-1);
-		--button-color: var(--color-theme-1);
-	}
-	&.equals {
-		--button-bg-color: var(--color-theme-4);
-		--button-color: var(--color-theme-4);
-	}
+	&.ac { --button-bg-color: var(--color-theme-1); --button-color: var(--color-theme-1); }
+	&.equals { --button-bg-color: var(--color-theme-4); --button-color: var(--color-theme-4); }
 }
 
 .calc-buttons {
@@ -122,9 +106,6 @@ button {
 	grid-template-columns: repeat(var(--columns), var(--button-size));
 }
 
-
-
-
 .table-container {
 	overflow: auto; /* so the table itself scrolls */
 	scrollbar-color: var(--color-theme-2) transparent;
@@ -133,7 +114,7 @@ button {
 	scrollbar-width: thin;
 	background: black;
 	border: 1px solid var(--color-bg-1);
-	
+
 	& table {
 		user-select: none;
 		border-collapse: collapse;
@@ -157,7 +138,7 @@ button {
 			color: var(--color-theme-2);
 		}
 		& tr:first-child th:first-child {
-		    z-index: 2;
+			z-index: 2;
 		}
 
 		& td {
@@ -166,7 +147,7 @@ button {
 			text-align: center;
 			border: 1px solid #222;
 			position: relative;
-				
+
 			&.highlighted {
 				color: var(--color-theme-3);
 				background: rgb(from var(--color-theme-3) R G B / 0.3);
@@ -189,7 +170,6 @@ button {
 				top: -100vh;
 				left: 0;
 				width: 100%;
-
 			}
 			&::before {
 				width: 200vw;
@@ -200,10 +180,6 @@ button {
 		}
 	}
 }
-
-
-
-
 
 .module {
 	padding: 20px;

@@ -25,4 +25,6 @@ Includes a Scientific Calculator, Quick Maths, Counting and other cool patterns!
 <SwitchBase />
 <NavBar />
 
-{@render children()}
+<div style="margin-bottom: 100px;">
+	{@render children()}
+</div>
