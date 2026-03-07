@@ -1,7 +1,6 @@
 <script lang="ts">
-	import { STORED_STATE } from '$lib/globalState.svelte';
+	import { STATE } from '$lib/globalState.svelte';
 	import { pronounce } from '$lib/otherMisc';
-	const base = $derived(STORED_STATE.base);
 
 	const { value }: { value: number } = $props();
 
@@ -18,11 +17,11 @@
 		to say them. Note that this pronounciation system is made up by me. But it does work well!
 	</p>
 
-	<div class="grid" style:grid-template-columns="repeat({NUMBERS_ON_EACH_SIDE * 2 + 1}, 1fr)">
+	<div class="grid in-module" style:grid-template-columns="repeat({NUMBERS_ON_EACH_SIDE * 2 + 1}, 1fr)">
 		{#each numbers as n}
 			<div class="number">
-				<span>{n.toString(base)}</span>
-				<span>{pronounce(n, base)}</span>
+				<span>{n.toString(STATE.base)}</span>
+				<span>{pronounce(n, STATE.base)}</span>
 			</div>
 		{/each}
 	</div>
@@ -32,9 +31,7 @@
 	.grid {
 		display: grid;
 		font-size: 1.2rem;
-		padding: 15px;
 		gap: 15px;
-		background: rgba(0, 0, 0, 0.3);
 	}
 
 	.number {

@@ -1,9 +1,8 @@
 <script lang="ts">
-    import { STORED_STATE } from "$lib/globalState.svelte";
+    import { STATE } from "$lib/globalState.svelte";
 	import { toFixedBase } from "$lib/mathstuff.svelte";
 	import { getBaseName } from "$lib/otherMisc";
 	import Checkbox from "../reuseable/Checkbox.svelte";
-    const base = $derived(STORED_STATE.base);
 
     type Reciprocal = { leading0s: number, terminating: string, repeating: string };
 
@@ -64,7 +63,7 @@
     
     let includeOddBases = $state(false);
     let tableFractionAmount = $state(27);
-    $effect(() => { base; tableFractionAmount = 27 })
+    $effect(() => { STATE.base; tableFractionAmount = 27 })
 
     const tableBases = $derived(Array.from({ length: 35 }, (_, i) => i + 2).filter(x => includeOddBases || x % 2 == 0));
     const tableFractions = $derived(Array.from({ length: tableFractionAmount - 1 }, (_, i) => i + 2));
@@ -75,8 +74,8 @@
     <h3>Division Efficiency</h3>
     <p>Division is very important when looking how easy math in a certain base is.
         If 1/3 is a simple decimal in some base, then 3 is an easy number to calculate with in that base.
-        <br>The score is calculated by going through each 1/n and calculating: <code>(1/n²) * (blueDigitAmount + 5 log(redDigitAmount + 1))</code>, then summing all of those.
-        <br>That formula is completely abrituary, BUT it gives a pretty good first look at how good a base is.
+        <br>The score is calculated by going through each 1/n and calculating: <strong>(1/n²) * (blueDigitAmount + 5 log(redDigitAmount + 1))</strong>, then summing all of those.
+        <br>That formula is completely abrituary, BUT it gives a pretty good first look at how good a base is. (lower score is better)
     </p>
     <div class="table-container">
     	<table>
@@ -86,13 +85,13 @@
                     <th>Score</th>
                     {#each tableFractions as tFraction}
                         <!-- / ⁄ -->
-                        <th>1/{tFraction.toString(base)}</th>
+                        <th>1/{tFraction.toString(STATE.base)}</th>
                     {/each}
                 </tr>
                 {#each tableBases as tBase}
-                    <tr class:active={tBase === base}>
+                    <tr class:active={tBase === STATE.base}>
                         <th class="base-header">{getBaseName(tBase)}</th>
-                        <td class="score highlighted">{toFixedBase(calculateBaseScore(tBase), base, 2)}</td>
+                        <td class="score highlighted">{toFixedBase(calculateBaseScore(tBase), STATE.base, 2)}</td>
                         {#each tableFractions as tFraction}
                             {@const r = analyzeReciprocal(tFraction, tBase)}
                             <td>
@@ -123,11 +122,11 @@
     }
 
     .repeating {
-        border-top: 1px solid var(--color-theme-1);
-        color: var(--color-theme-1);
+        border-top: 1px solid var(--color-theme-red);
+        color: var(--color-theme-red);
     }
     .terminating {
-        color: var(--color-theme-4);
+        color: var(--color-theme-blue);
     }
 
     .size-buttons {

@@ -32,7 +32,7 @@
 	.links {
 		display: flex;
 		gap: 20px;
-		box-shadow: inset 0 -2px 0 color-mix(in oklab, var(--color-theme-2) 50%, black 50%);
+		box-shadow: inset 0 -2px 0 color-mix(in oklab, var(--color-theme-dyn) 50%, black 50%);
 		padding: 0 10px;
 	}
 
@@ -52,20 +52,20 @@
 
 		/* & span {
 	    	font-size: 0.65rem;
-	    	color: var(--color-theme-2);
+	    	color: var(--color-theme-dyn);
 	    	opacity: 0.5;
 	    } */
 
 		&:hover {
 			color: white;
 			background: rgba(255, 255, 255, 0.05);
-			box-shadow: inset 0 -2px 0 color-mix(in oklab, var(--color-theme-2) 70%, black 30%);
+			box-shadow: inset 0 -2px 0 color-mix(in oklab, var(--color-theme-dyn) 70%, black 30%);
 		}
 
 		&.active {
 			color: white;
 			background: rgba(255, 255, 255, 0.05);
-			box-shadow: inset 0 -2px 0 var(--color-theme-2);
+			box-shadow: inset 0 -2px 0 var(--color-theme-dyn);
 		}
 	}
 </style>

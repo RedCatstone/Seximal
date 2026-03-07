@@ -1,9 +1,8 @@
 <script lang="ts">
-	import { STORED_STATE } from '$lib/globalState.svelte';
+	import { STATE } from '$lib/globalState.svelte';
 	import { displayCalc, displayInfix, doInfixCalc, doPrefixCalc, type InfixOperator, type InfixOrPrefixCalc, type PrefixOperator } from '$lib/mathstuff.svelte';
 	import { untrack } from 'svelte';
 	import NumKeypad from './reuseable/NumKeypad.svelte';
-	const base = $derived(STORED_STATE.base);
 
 	// ------------------------------
 	//      Calculator State
@@ -74,7 +73,7 @@
 	}
 
 	$effect(() => {
-		base;
+		STATE.base;
 		// recalculate prefix operations on base switch, the result
 		// can change on base dependendent ops like: Sum, Prim, log, %, Say
 		untrack(() => {
@@ -137,7 +136,7 @@
 <svelte:window onkeydown={handleKeyDown} />
 <div class="container">
 	<header>
-		<span class="brand">{STORED_STATE.baseName.toUpperCase()} IT-{(69).toString(base)}D</span>
+		<span class="brand">{STATE.baseName.toUpperCase()} IT-{(69).toString(STATE.base)}D</span>
 	</header>
 	<div class="output-area">
 		<div class="past-calc">{displayedPastCalc}</div>
@@ -156,10 +155,10 @@
 		<button class="const" onclick={() => loadConstant((1 + Math.sqrt(5)) / 2)}>ϕ</button>
 	</div>
 	<div class="calc-buttons" style:--columns="5" style:margin-bottom="25px">
-		<button class="util" onclick={() => pressPrefixOp('%')}>%</button>
-		<button class="util" onclick={() => pressPrefixOp('log')}>log</button>
-		<button class="util" onclick={() => pressPrefixOp('Sum ')}>Sum</button>
-		<button class="util" onclick={() => pressPrefixOp('Say ')}>Say</button>
+		<button class="dyn" onclick={() => pressPrefixOp('%')}>%</button>
+		<button class="dyn" onclick={() => pressPrefixOp('log ')}>log</button>
+		<button class="dyn" onclick={() => pressPrefixOp('Sum ')}>Sum</button>
+		<button class="dyn" onclick={() => pressPrefixOp('Say ')}>Say</button>
 	</div>
 	<div style:display="flex" style:justify-content="center" style:gap="25px">
 		<NumKeypad
@@ -224,7 +223,7 @@
 			display: flex;
 			justify-content: flex-end;
 			font-size: 1rem;
-			color: var(--color-theme-4);
+			color: var(--color-theme-blue);
 			opacity: 0.7;
 		}
 	}

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { STORED_STATE } from '$lib/globalState.svelte';
+	import { STATE } from '$lib/globalState.svelte';
 	import { getBaseName } from '$lib/otherMisc';
 
 	const PRESET_BASES = [6, 10, 12, 16];
@@ -7,7 +7,7 @@
 
 	function changeBase(b: number) {
 		if (b >= 2 && b <= 36) {
-			STORED_STATE.base = b;
+			STATE.base = b;
 		}
 	}
 
@@ -28,7 +28,7 @@
 	<div class="container">
 		<div class="base-and-input">
 			<span>BASE:</span>
-			<div class="base-input" class:active={!PRESET_BASES.includes(STORED_STATE.base)}>
+			<div class="base-input" class:active={!PRESET_BASES.includes(STATE.base)}>
 				<input
 					type="number"
 					id="custom-base"
@@ -38,13 +38,13 @@
 					bind:value={customInputValue}
 					oninput={(e) => changeBase(Number(e.currentTarget.value))}
 				/>
-				<span>{STORED_STATE.baseName}</span>
+				<span>{STATE.baseName}</span>
 			</div>
 		</div>
 		<div class="preset-bases">
 			{#each PRESET_BASES as b}
 				<button
-					class:active={STORED_STATE.base === b}
+					class:active={STATE.base === b}
 					onclick={() => {
 						changeBase(b);
 						customInputValue = '';
@@ -107,11 +107,11 @@
 				stroke-linejoin: round;
 			}
 			&.active {
-				color: var(--color-theme-2);
+				color: var(--color-theme-dyn);
 
 				& polygon {
-					fill: color-mix(in oklab, var(--color-theme-2) 50%, black 50%);
-					stroke: var(--color-theme-2);
+					fill: color-mix(in oklab, var(--color-theme-dyn) 50%, black 50%);
+					stroke: var(--color-theme-dyn);
 					stroke-width: 3;
 				}
 			}
@@ -123,7 +123,7 @@
 		flex-direction: column;
 		align-items: center;
 
-		color: var(--color-theme-2);
+		color: var(--color-theme-dyn);
 		font-size: 0.8rem;
 		font-weight: 500;
 		white-space: nowrap;

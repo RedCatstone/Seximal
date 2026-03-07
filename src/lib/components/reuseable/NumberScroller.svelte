@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { STORED_STATE } from '$lib/globalState.svelte';
-	const base = $derived(STORED_STATE.base);
+	import { STATE } from '$lib/globalState.svelte';
 
 	let { value = $bindable() }: { value: number } = $props();
 
@@ -102,7 +101,7 @@
 				style:width="{ITEM_WIDTH}px"
 				style:transform="translateX({(i - NUMBERS_ON_EACH_SIDE) * ITEM_WIDTH}px)"
 			>
-				{n.toString(base)}
+				{n.toString(STATE.base)}
 			</div>
 		{/each}
 	</div>
@@ -151,7 +150,7 @@
         position: absolute;
         width: 65px;
         height: 50px;
-        border: 2px solid var(--color-theme-2);
+        border: 2px solid var(--color-theme-dyn);
         border-radius: 10px;
         z-index: 1;
     } */

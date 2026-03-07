@@ -3,22 +3,21 @@
 	import DivisibilityRules from '$lib/components/counting/DivisibilityRules.svelte';
 	import DivisionEfficiencyTable from '$lib/components/counting/DivisionEfficiencyTable.svelte';
 	import Pronounciation from '$lib/components/counting/Pronounciation.svelte';
-	import TallyMarks from '$lib/components/counting/TallyMarks.svelte';
+	import TallyMarks from '$lib/components/counting/CountingMethods.svelte';
 	import NumberPatternsTable from '$lib/components/NumberPatternsTable.svelte';
 	import NumberScroller from '$lib/components/reuseable/NumberScroller.svelte';
 	import TimesTable from '$lib/components/TimesTable.svelte';
-	import { STORED_STATE } from '$lib/globalState.svelte';
-	const base = $derived(STORED_STATE.base);
+	import { STATE } from '$lib/globalState.svelte';
 
 	let value = $state(2);
-	let valueStr = $derived(value.toString(base));
+	let valueStr = $derived(value.toString(STATE.base));
 </script>
 
 <svelte:head>
-	<title>{STORED_STATE.baseName} Counting</title>
+	<title>{STATE.baseName} Counting</title>
 	<meta
 		name="description"
-		content="Number counting in base {STORED_STATE.baseName}. Finger-counting, tally-marks, converting bases and divisibility rules for any number in any base."
+		content="Number counting in base {STATE.baseName}. Finger-counting, tally-marks, converting bases and divisibility rules for any number in any base."
 	/>
 </svelte:head>
 
@@ -32,7 +31,7 @@
 					id="scroller-value"
 					placeholder="0"
 					bind:value={valueStr}
-					oninput={() => (value = parseInt(valueStr, base) || 0)}
+					oninput={() => (value = parseInt(valueStr, STATE.base) || 0)}
 				/>
 			</div>
 			<div class="scroller">

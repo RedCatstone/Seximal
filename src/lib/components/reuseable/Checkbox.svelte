@@ -46,13 +46,13 @@
 		display: none;
 
 		&:checked ~ .custom-box {
-			border-color: var(--color-theme-2);
+			border-color: var(--color-theme-dyn);
 			box-shadow: 0 0 10px rgba(88, 50, 226, 0.3);
-			--background: color-mix(in oklab, black, var(--color-theme-2) 40%);
+			--background: color-mix(in oklab, black, var(--color-theme-dyn) 40%);
 		}
 
 		&:checked ~ .label-text {
-			color: var(--color-theme-2) !important;
+			color: var(--color-theme-dyn) !important;
 		}
 	}
 </style>

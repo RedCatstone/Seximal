@@ -1,9 +1,8 @@
 <script lang="ts">
-	import { STORED_STATE } from '$lib/globalState.svelte';
+	import { STATE } from '$lib/globalState.svelte';
 	import { displayCalc, displayKeypadNum, displayNumber, doCalc, type InfixOperator, type InfixOrPrefixCalc } from '$lib/mathstuff.svelte';
 	import { getBaseName } from '$lib/otherMisc';
 	import NumKeypad from './reuseable/NumKeypad.svelte';
-	const base = $derived(STORED_STATE.base);
 
 	let currGameBase: number | null = $state(null);
 	let pastQuestions: { question: InfixOrPrefixCalc; answer: number }[] = $state([]);
@@ -34,11 +33,11 @@
 						? 2 + pastQuestions.length / 3
 						: 2 + pastQuestions.length;
 
-			const num1 = Math.floor(Math.random() * upTo) || base; // 0 gets turned into 10 because 10 is fun ;p
-			const num2 = Math.floor(Math.random() * upTo) || base;
+			const num1 = Math.floor(Math.random() * upTo) || STATE.base; // 0 gets turned into 10 because 10 is fun ;p
+			const num2 = Math.floor(Math.random() * upTo) || STATE.base;
 
 			const answer = doCalc([num1, op, num2]);
-			if (typeof answer === 'number' && Number.isInteger(base ** decimalDigitsAllowed * answer)) {
+			if (typeof answer === 'number' && Number.isInteger(STATE.base ** decimalDigitsAllowed * answer)) {
 				return [num1, op, num2];
 			}
 		}
@@ -66,7 +65,7 @@
 
 	function startTimer() {
 		timeLeftMs = TIMER_MAX_TIME;
-		currGameBase = base;
+		currGameBase = STATE.base;
 
 		let previousFrameTimestamp = performance.now();
 		requestAnimationFrame(function tick(timestamp: DOMHighResTimeStamp) {
@@ -86,7 +85,7 @@
 
 	// game-over on base switch
 	$effect(() => {
-		if (currGameBase != null && base != currGameBase) {
+		if (currGameBase != null && STATE.base != currGameBase) {
 			// switched base mid game...
 			makeGameOver();
 		}
@@ -100,8 +99,8 @@
 		if (typeof answer === 'number') {
 			keypadInputNum = answer;
 		}
-		if (pastQuestions.length > (STORED_STATE.quickMathsHighscores[currGameBase!] ?? 0)) {
-			STORED_STATE.quickMathsHighscores[currGameBase!] = pastQuestions.length;
+		if (pastQuestions.length > (STATE.quickMathsHighscores[currGameBase!] ?? 0)) {
+			STATE.quickMathsHighscores[currGameBase!] = pastQuestions.length;
 		}
 	}
 
@@ -142,13 +141,13 @@
 <div class="container" class:game-over={gameOver} style:--questions={pastQuestions.length}>
 	<div class="questions" bind:this={scrollAnchor}>
 		{#each pastQuestions as question, i}
-			<span data-number={(i + 1).toString(base)} style:--i={i}
+			<span data-number={(i + 1).toString(STATE.base)} style:--i={i}
 				>{`${displayCalc(question.question)} = ${displayNumber(question.answer)}`}</span
 			>
 		{/each}
 
 		<div class="curr-question">
-			<span data-number={(pastQuestions.length + 1).toString(base)}
+			<span data-number={(pastQuestions.length + 1).toString(STATE.base)}
 				>{displayCalc(currQuestion) + ' ='}</span
 			>
 			<div class="input-num">
@@ -158,17 +157,17 @@
 	</div>
 	{#if timeLeftMs != null}
 		<div class="timer-stuff">
-			<span>{Math.ceil(timeLeftMs / 1000).toString(base)}</span>
+			<span>{Math.ceil(timeLeftMs / 1000).toString(STATE.base)}</span>
 			<div class="timer-bar" style:--fill={`${(timeLeftMs * 100) / TIMER_MAX_TIME}%`}></div>
 		</div>
 	{/if}
 	{#if gameOver}
 		<div class="game-over-msg">
 			You got
-			<span class="questions-correct">{pastQuestions.length.toString(base)}</span>
-			{getBaseName(currGameBase!)} Question{pastQuestions.length == 1 ? '' : 's'} correct! (Best: {STORED_STATE.quickMathsHighscores[
+			<span class="questions-correct">{pastQuestions.length.toString(STATE.base)}</span>
+			{getBaseName(currGameBase!)} Question{pastQuestions.length == 1 ? '' : 's'} correct! (Best: {STATE.quickMathsHighscores[
 				currGameBase!
-			].toString(base)})
+			].toString(STATE.base)})
 			<button class="util" onclick={retry}>Retry</button>
 		</div>
 	{/if}
@@ -196,7 +195,7 @@
 		gap: 20px;
 		font-family: 'JetBrains Mono', monospace;
 
-		--questions-color: hsl(from var(--color-theme-1) calc(h + calc(4 * var(--questions))) s l);
+		--questions-color: hsl(from var(--color-theme-red) calc(h + calc(4 * var(--questions))) s l);
 	}
 
 	.questions {
@@ -208,13 +207,13 @@
 		--i: var(--questions); /* Fallback for the current question */
 
 		& span {
-			color: hsl(from var(--color-theme-1) calc(h + calc(4 * var(--i))) s l);
+			color: hsl(from var(--color-theme-red) calc(h + calc(4 * var(--i))) s l);
 		}
 
 		& span::before {
 			/* counter-increment: q; */
 			content: attr(data-number) '. ';
-			color: var(--color-bg-2);
+			color: var(--color-text-dim);
 			font-size: 1.4rem;
 		}
 
@@ -224,8 +223,8 @@
 			width: clamp(40px, 20vw, 100px);
 			padding: 0 5px;
 
-			color: var(--color-theme-2);
-			border-bottom: 2px solid var(--color-bg-2);
+			color: var(--color-theme-dyn);
+			border-bottom: 2px solid var(--color-text-dim);
 			margin-bottom: -2px;
 
 			/* border doesn't shift when content is '' */

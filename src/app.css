@@ -6,10 +6,11 @@
 	--color-text-dim: #777;
 	--color-text-kinda-dim: #999;
 	--color-text-very-dim: #333333;
-	--color-theme-1: #f74242;
-	--color-theme-2: #f1ad46;
-	--color-theme-3: #7adf7f;
-	--color-theme-4: #3cb9f3;
+	--color-theme-red: #f74242;
+	--color-theme-green: #7adf7f;
+	--color-theme-blue: #3cb9f3;
+	--color-theme-gold: #f1ad46;
+	--color-theme-dyn: /* will get overwritten by js */ var(--color-theme-gold);
 
 	background: var(--color-bg-0);
 	color: var(--color-text);
@@ -18,7 +19,7 @@
 }
 
 h1, h2, h3 {
-	color: var(--color-theme-2);
+	color: var(--color-theme-dyn);
 	margin: 0;
 }
 
@@ -42,7 +43,7 @@ input[type='number'], input[type='text'] {
 
 	background: black;
 	border: 1px solid transparent;
-	color: var(--color-theme-2);
+	color: var(--color-theme-dyn);
 	border-radius: 4px;
 	outline: none;
 	text-align: center;
@@ -54,7 +55,7 @@ input[type='number'], input[type='text'] {
 	}
 }
 .active input {
-	border: 1px solid var(--color-theme-2);
+	border: 1px solid var(--color-theme-dyn);
 }
 
 button {
@@ -91,10 +92,11 @@ button {
 	}
 
 	&.digit { --button-color: var(--color-text); --button-bg-color: var(--color-text); }
-	&.util { --button-color: var(--color-theme-2); font-size: 1.3rem; }
-	&.const { --button-color: var(--color-theme-3); }
-	&.ac { --button-bg-color: var(--color-theme-1); --button-color: var(--color-theme-1); }
-	&.equals { --button-bg-color: var(--color-theme-4); --button-color: var(--color-theme-4); }
+	&.util { --button-color: var(--color-theme-gold); font-size: 1.3rem; }
+	&.dyn { --button-color: var(--color-theme-dyn); font-size: 1.3rem; }
+	&.const { --button-color: var(--color-theme-green); }
+	&.ac { --button-bg-color: var(--color-theme-red); --button-color: var(--color-theme-red); }
+	&.equals { --button-bg-color: var(--color-theme-blue); --button-color: var(--color-theme-blue); }
 }
 
 .calc-buttons {
@@ -108,7 +110,7 @@ button {
 
 .table-container {
 	overflow: auto; /* so the table itself scrolls */
-	scrollbar-color: var(--color-theme-2) transparent;
+	scrollbar-color: var(--color-theme-dyn) transparent;
 	max-height: 600px;
 	width: 100%;
 	scrollbar-width: thin;
@@ -136,7 +138,7 @@ button {
 			left: 0;
 			z-index: 1;
 			padding: 4px;
-			color: var(--color-theme-2);
+			color: var(--color-theme-dyn);
 		}
 		& tr:first-child th:first-child {
 			z-index: 2;
@@ -150,8 +152,8 @@ button {
 			position: relative;
 
 			&.highlighted {
-				color: var(--color-theme-3);
-				background: rgb(from var(--color-theme-3) R G B / 0.3);
+				color: var(--color-theme-green);
+				background: rgb(from var(--color-theme-green) R G B / 0.3);
 				font-weight: bold;
 			}
 			&.dim {
@@ -181,7 +183,7 @@ button {
 		}
 
 		& tr.active {
-			border: 2px solid var(--color-theme-2);
+			border: 2px solid var(--color-theme-dyn);
 		}
 	}
 }
@@ -195,4 +197,16 @@ button {
 		font-size: 1rem;
 		margin: 5px 0 15px 0;
 	}
+	& .in-module {
+		padding: 15px;
+		background: rgba(0, 0, 0, 0.3);
+		border: 1px solid var(--color-bg-1);
+		border-radius: 10px;
+	}
+}
+
+strong {
+	background: #333;
+	padding: 2px 4px;
+	font-weight: bold;
 }

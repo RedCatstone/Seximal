@@ -1,8 +1,7 @@
-import { STORED_STATE } from '$lib/globalState.svelte';
+import { STATE } from '$lib/globalState.svelte';
 import { pronounce } from './otherMisc';
-const base = $derived(STORED_STATE.base);
 
-export type PrefixOperator = '%' | '√' | '!' | 'log' | '1/' | 'Sum ' | 'Prim ' | 'Say ';
+export type PrefixOperator = '%' | '√' | '!' | 'log ' | '1/' | 'Sum ' | 'Prim ' | 'Say ';
 export type InfixOperator = '+' | '-' | '×' | '÷' | '^' | 'mod' | 'log_';
 
 export type InfixOrPrefixCalc = [number, InfixOperator, number] | [PrefixOperator, number];
@@ -18,14 +17,14 @@ export const infixOpNames = {
 };
 
 export function doPrefixCalc(op: PrefixOperator, n: number): number | number[] | string {
-	if (op == '%') return n / base**2;
+	if (op == '%') return n / STATE.base**2;
 	else if (op == '√') return Math.sqrt(n);
 	else if (op == '!') return gamma(n + 1);
-	else if (op == 'log') return Math.log(n) / Math.log(base);
+	else if (op == 'log ') return Math.log(n) / Math.log(STATE.base);
 	else if (op == '1/') return 1 / n;
-	else if (op == 'Sum ') return n.toString(base).split('').reduce((tot, x) => tot + parseInt(x, base), 0);
+	else if (op == 'Sum ') return n.toString(STATE.base).split('').reduce((tot, x) => tot + parseInt(x, STATE.base), 0);
 	else if (op == 'Prim ') return primeFactors(n);
-	else if (op == 'Say ') return pronounce(n, base);
+	else if (op == 'Say ') return pronounce(n, STATE.base);
 	throw new Error("woops.");
 }
 
@@ -50,15 +49,15 @@ export function displayNumber(n: number | null): string {
 	const absN = Math.abs(n);
 
 	// thresholds for switching to exponential
-	const upperLimit = base ** 9;
-	const lowerLimit = base ** -5;
+	const upperLimit = STATE.base ** 9;
+	const lowerLimit = STATE.base ** -5;
 
 	if (absN >= lowerLimit && absN <= upperLimit) {
-		return n.toString(base);
+		return n.toString(STATE.base);
 	}
-	const exponent = Math.floor(Math.log(absN) / Math.log(base));
-	const significand = n / base**exponent;
-	return `${significand.toString(base).substring(0, 6)}𝕖${exponent.toString(base)}`;
+	const exponent = Math.floor(Math.log(absN) / Math.log(STATE.base));
+	const significand = n / STATE.base**exponent;
+	return `${significand.toString(STATE.base).substring(0, 6)}𝕖${exponent.toString(STATE.base)}`;
 }
 
 export function displayKeypadNum(keypadNum: number, keypadDecimal: number | null): string {
@@ -194,7 +193,7 @@ export function getTrailingAndCoprime(n: number): number[] {
 	if (n === 1 || n === 0) return [n];
 	let trailing = 1;
 	let coprime = n;
-	const basePrimes = primeFactors(base);
+	const basePrimes = primeFactors(STATE.base);
 	// Pull factors out of n
 	let changed = true;
 	while (changed) {
@@ -221,9 +220,9 @@ export function isPrime(num: number): boolean {
 export function isHarshad(n: number) {
 	if (n === 0) return false;
 	const digitSum = n
-		.toString(base)
+		.toString(STATE.base)
 		.split('')
-		.map((d) => parseInt(d, base))
+		.map((d) => parseInt(d, STATE.base))
 		.reduce((a, b) => a + b, 0);
 
 	return n % digitSum === 0;
@@ -239,9 +238,9 @@ export function isHappyNumber(n: number): boolean {
 		seen.add(current);
 		// get the basedigits and sum the squares
 		current = current
-			.toString(base)
+			.toString(STATE.base)
 			.split('')
-			.map((d) => parseInt(d, base))
+			.map((d) => parseInt(d, STATE.base))
 			.reduce((sum, digit) => sum + digit * digit, 0);
 	}
 	// if it exited because current is 1, happy!
@@ -249,11 +248,11 @@ export function isHappyNumber(n: number): boolean {
 }
 
 export function floorWithPrecision(num: number, precision: number): number {
-	const factor = base**precision;
+	const factor = STATE.base**precision;
 	return Math.floor(num * factor) / factor;
 }
 export function ceilWithPrecision(num: number, precision: number): number {
-	const factor = base**precision;
+	const factor = STATE.base**precision;
 	return Math.ceil(num * factor) / factor;
 }
 
@@ -263,7 +262,7 @@ export function toFixedBase(num: number, base: number, precision: number): strin
 }
 
 export function displayOrArray(arr: number[], or="or"): string {
-	return displayStrOrArray(arr.map(x => x.toString(base)), or);
+	return displayStrOrArray(arr.map(x => x.toString(STATE.base)), or);
 }
 export function displayStrOrArray(arr: string[], or = 'or'): string {
 	if (arr.length === 1) return arr[0];
