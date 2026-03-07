@@ -5,7 +5,8 @@
 
 <svelte:head>
 	<title>{STATE.baseName} Calculator</title>
-	<meta name="description" content="{STATE.baseName} Scientific Calculator. Technically this is also a base-converter." />
+	<meta name="description" content={`${STATE.baseName} Scientific Calculator. Equipped with a base-converter and a bunch of base-specific operations:\
+Logarithms, Digitsums, Pronounciation, Percentages, Prime Factorization, Reciprocals and some constants.`} />
 </svelte:head>
 
 <main>

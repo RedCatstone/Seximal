@@ -80,11 +80,6 @@
         margin-bottom: 4px;
         line-height: 1.4;
     }
-    .bullet {
-        color: var(--color-theme-dyn);
-        font-weight: 800;
-        margin-right: 5px;
-    }
     .example {
         color: var(--color-text-kinda-dim);
         margin-left: 30px;

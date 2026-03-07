@@ -210,3 +210,9 @@ strong {
 	padding: 2px 4px;
 	font-weight: bold;
 }
+
+.bullet {
+	color: var(--color-theme-dyn);
+	font-weight: 800;
+	margin-right: 5px;
+}

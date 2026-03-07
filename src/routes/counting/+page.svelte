@@ -17,7 +17,8 @@
 	<title>{STATE.baseName} Counting</title>
 	<meta
 		name="description"
-		content="Number counting in base {STATE.baseName}. Finger-counting, tally-marks, converting bases and divisibility rules for any number in any base."
+		content={`Number counting in base ${STATE.baseName}. Finger-counting, tally-marks, pronounciation, converting bases, multiplication table, cool pattern tables\
+and divisibility rules for any number in any base.`}
 	/>
 </svelte:head>
 

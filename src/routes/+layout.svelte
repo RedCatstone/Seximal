@@ -35,7 +35,8 @@
 
 	<!-- SEO yay -->
 	<meta name="description" content={"Explore the beauty of different number-bases: (Seximal, Dozenal, Hex, Binary, Ternary, Quaternary, ...). \
-Includes a Scientific Calculator, Quick Maths, Counting and other cool patterns! Seximal (Base 6) is objectively the best/most natural number system."} />
+Includes a Scientific Calculator with a base converter, Quick Maths, Counting Methods, pronounciation, multiplication table, division efficiency and other cool patterns!\
+Seximal (Base 6) is objectively the best/most natural number system."} />
     <meta property="og:title" content="Seximal - Numberbase Stuff" />
     <meta property="og:description" content="Seximal (Base 6) is objectively the best/most natural number system." />
 	<meta name="theme-color" content="#f1ad46" />

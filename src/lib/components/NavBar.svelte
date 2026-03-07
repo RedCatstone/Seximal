@@ -4,34 +4,27 @@
 </script>
 
 <nav class="container-container">
-	<div class="container">
-		<div class="links">
-			<a href={resolve('/counting')} class:active={page.url.pathname === resolve('/counting')}>Counting</a>
-			<a href={resolve('/calculator')} class:active={page.url.pathname === resolve('/calculator')}>Calculator</a>
-			<a href={resolve('/quickmaths')} class:active={page.url.pathname === resolve('/quickmaths')}>Quick Maths</a>
-		</div>
+	<div class="links">
+		<a href={resolve('/counting')} class:active={page.url.pathname === resolve('/counting')}>Counting</a>
+		<a href={resolve('/calculator')} class:active={page.url.pathname === resolve('/calculator')}>Calculator</a>
+		<a href={resolve('/quickmaths')} class:active={page.url.pathname === resolve('/quickmaths')}>Quick Maths</a>
+		<a href={resolve('/extra')} class:active={page.url.pathname === resolve('/extra')}>Extra</a>
 	</div>
 </nav>
 
 <style>
 	.container-container {
-		width: 100%;
-		display: flex;
-		justify-content: center;
 		background: rgba(0, 0, 0, 0.3);
 		margin-bottom: 5px;
 		border-bottom: 1px solid var(--color-bg-1);
 		padding: 10px 0;
 	}
 
-	.container {
-		display: flex;
-		overflow-x: auto;
-	}
-
 	.links {
 		display: flex;
-		gap: 20px;
+		justify-content: center;
+		flex-wrap: wrap;
+		text-wrap-mode: nowrap;
 		box-shadow: inset 0 -2px 0 color-mix(in oklab, var(--color-theme-dyn) 50%, black 50%);
 		padding: 0 10px;
 	}
