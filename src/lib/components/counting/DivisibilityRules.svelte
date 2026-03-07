@@ -44,6 +44,7 @@
                             ? `digit${rule.lastDigits === 1 ? '' : 's'} must be ${rule.digits}`
                             : `${rule.lastDigits} digits must be divisible by ${n.toString(base)}`
                         }.
+
                     {:else if rule.type == 'universal digit sum'}
                     <span class="bullet">Σ</span>
                         {#if rule.multiplyBy === 1}
@@ -55,6 +56,9 @@
                             {rule.multiplyBy < 0 ? 'subtract it from' : 'add it to'} the other digits.
                         {/if}
                         {#if rule.example}<br><span class="example">{rule.example}</span>{/if}
+
+                    {:else if rule.type == 'zero'}
+                        <span class="example">No number is divisible by 0 :(</span>
                     {/if}
                 </div>
             {/each}

@@ -105,12 +105,14 @@ export function pronounce(n: number, base: number): string {
 // --------------------------
 export type DivisibilityRule =
     { type: 'trailing', lastDigits: number, digits?: string }
-    | { type: 'universal digit sum', multiplyBy: number, groupDigits: number, example?: string };
+    | { type: 'universal digit sum', multiplyBy: number, groupDigits: number, example?: string }
+    | { type: 'zero' };
 
 const DIV_RULES_DISPLAY_ALL = false;
 const DIV_RULES_K_LIMIT = 1_000_000;
 
 export function divisibilityRules(n: number, base: number): DivisibilityRule[] {
+    if (n === 0) return [{ type: 'zero' }];
     n = Math.abs(n);
     const rules: DivisibilityRule[] = [];
 

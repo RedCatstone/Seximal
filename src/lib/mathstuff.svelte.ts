@@ -257,6 +257,11 @@ export function ceilWithPrecision(num: number, precision: number): number {
 	return Math.ceil(num * factor) / factor;
 }
 
+export function toFixedBase(num: number, base: number, precision: number): string {
+	const str = Math.round(num * base**precision).toString(base);
+	return `${str.slice(0, -2) || "0"}.${str.slice(-2)}`
+}
+
 export function displayOrArray(arr: number[], or="or"): string {
 	return displayStrOrArray(arr.map(x => x.toString(base)), or);
 }

@@ -31,7 +31,7 @@ nav, main {
 }
 
 main > * {
-	max-width: 600px;
+	max-width: min(600px, 95vw);
 }
 
 input[type='number'], input[type='text'] {
@@ -114,6 +114,7 @@ button {
 	scrollbar-width: thin;
 	background: black;
 	border: 1px solid var(--color-bg-1);
+	position: relative;
 
 	& table {
 		user-select: none;
@@ -177,6 +178,10 @@ button {
 				top: 0;
 				height: 100%;
 			}
+		}
+
+		& tr.active {
+			border: 2px solid var(--color-theme-2);
 		}
 	}
 }

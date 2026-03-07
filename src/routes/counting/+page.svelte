@@ -1,6 +1,7 @@
 <script>
 	import BackToDecimal from '$lib/components/counting/BackToDecimal.svelte';
 	import DivisibilityRules from '$lib/components/counting/DivisibilityRules.svelte';
+	import DivisionEfficiencyTable from '$lib/components/counting/DivisionEfficiencyTable.svelte';
 	import Pronounciation from '$lib/components/counting/Pronounciation.svelte';
 	import TallyMarks from '$lib/components/counting/TallyMarks.svelte';
 	import NumberPatternsTable from '$lib/components/NumberPatternsTable.svelte';
@@ -42,15 +43,13 @@
 		<Pronounciation {value} />
 		<TallyMarks {value} />
 		<DivisibilityRules {value} />
-
-		<div></div>
-		<div></div>
-		<div></div>
-
 		<NumberPatternsTable multiplesOf={value} />
 	</div>
 
-	<TimesTable />
+	<div class="sticky-boundary">
+		<TimesTable />
+		<DivisionEfficiencyTable />
+	</div>
 </main>
 
 <style>
@@ -76,7 +75,7 @@
 	.sticky-boundary {
 		display: flex;
 		flex-direction: column;
-		gap: 20px;
+		gap: 40px;
 		margin-bottom: 80px;
 
 		& .sticky-scroller {

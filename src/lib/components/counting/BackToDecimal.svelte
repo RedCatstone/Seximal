@@ -57,7 +57,6 @@
 		font-size: 1.2rem;
 		padding: 15px;
 		background: rgba(0, 0, 0, 0.3);
-		max-width: 80vw;
 		overflow-x: auto;
 	}
 
